@@ -82,15 +82,15 @@ generate_single_image <- function(
   prompt <- build_prompt(resolved$text, image_spec$style)
   images <- lapply(resolved$images, ellmer::content_image_file)
 
+  image_config <- list(aspectRatio = image_spec$`aspect-ratio`)
+  if (image_spec$model == "gemini-3-pro-image-preview") {
+    image_config$imageSize <- image_spec$resolution
+  }
+
   chat <- ellmer::chat_google_gemini(
-    model = "gemini-2.5-flash-image",
+    model = image_spec$model,
     api_args = list(
-      generationConfig = list(
-        imageConfig = list(
-          aspectRatio = image_spec$`aspect-ratio`,
-          imageSize = image_spec$resolution
-        )
-      )
+      generationConfig = list(imageConfig = image_config)
     )
   )
 
