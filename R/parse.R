@@ -1,10 +1,3 @@
-#' Resolve a path to a config file
-#'
-#' If `path` is a directory, looks for `bananarama.yaml` inside it.
-#'
-#' @param path Path to a YAML file or directory.
-#' @return The resolved path to the config file.
-#' @noRd
 resolve_config_path <- function(path) {
   if (dir.exists(path)) {
     path <- file.path(path, "bananarama.yaml")
@@ -17,17 +10,6 @@ resolve_config_path <- function(path) {
   path
 }
 
-#' Parse an image configuration file
-#'
-#' @param config_path Path to the YAML configuration file.
-#' @return A list with components:
-#'   * `defaults`: Named list of default settings (style, aspect-ratio,
-#'     resolution).
-#'   * `images`: List of image specs, each with name, description, and
-#'     optionally builds-on and override settings.
-#'   * `base_dir`: Directory containing the config file (for finding reference
-#'     images).
-#' @noRd
 parse_image_config <- function(config_path) {
   config <- yaml::read_yaml(config_path)
 
@@ -37,7 +19,6 @@ parse_image_config <- function(config_path) {
   list(
     defaults = defaults,
     images = images,
-
     base_dir = dirname(config_path)
   )
 }
@@ -81,18 +62,6 @@ parse_images <- function(images, defaults) {
   })
 }
 
-#' Resolve image placeholders in a description
-#'
-#' Finds all `[name]` patterns and replaces them with hybrid references that
-#' include both the name and ordinal position.
-#'
-#' @param description A description string potentially containing `[name]`
-#'   placeholders.
-#' @param base_dir Directory to search for reference images.
-#' @return A list with:
-#'   * `text`: The description with placeholders replaced.
-#'   * `images`: Character vector of image file paths in order of appearance.
-#' @noRd
 resolve_placeholders <- function(description, base_dir) {
   # Find all [name] patterns
 
@@ -125,12 +94,6 @@ resolve_placeholders <- function(description, base_dir) {
   list(text = text, images = images)
 }
 
-#' Find an image file by name
-#'
-#' @param name The base name of the image (without extension).
-#' @param base_dir Directory to search in.
-#' @return The full path to the image file.
-#' @noRd
 find_image_file <- function(name, base_dir) {
   extensions <- c(".png", ".jpg", ".jpeg", ".webp", ".gif")
 
@@ -147,13 +110,6 @@ find_image_file <- function(name, base_dir) {
   ))
 }
 
-#' Build the prompt to send to Gemini
-#'
-#' @param description The image description (with placeholders already
-#'   resolved).
-#' @param style The style string to prepend.
-#' @return The full prompt string.
-#' @noRd
 build_prompt <- function(description, style) {
   if (is.null(style) || style == "") {
     description

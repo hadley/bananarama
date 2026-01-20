@@ -1,12 +1,3 @@
-#' Sort images by their dependencies
-#'
-#' Performs a topological sort so that images are processed in the correct
-#' order, with dependencies coming before the images that depend on them.
-#'
-#' @param images A list of image specs, each with a `name` and optionally a
-#'   `builds-on` field.
-#' @return The same list reordered so dependencies come first.
-#' @noRd
 sort_by_dependencies <- function(images) {
   if (length(images) == 0) {
     return(images)
@@ -65,12 +56,6 @@ sort_by_dependencies <- function(images) {
   result
 }
 
-#' Detect circular dependencies
-#'
-#' @param images List of image specs.
-#' @param name_to_idx Named vector mapping names to indices.
-#' @param in_degree Integer vector of in-degrees.
-#' @noRd
 detect_cycle <- function(images, name_to_idx, in_degree) {
   # If there's a cycle, we won't be able to process all images
   # We can detect this by doing a DFS and looking for back edges

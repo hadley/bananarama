@@ -64,14 +64,6 @@ bananarama <- function(
   invisible(output_paths)
 }
 
-#' Generate a single image
-#'
-#' @param image_spec The image specification from the config.
-#' @param base_dir Directory containing reference images.
-#' @param output_path Path to save the generated image.
-#' @param generated List of previously generated images (for builds-on chains).
-#' @return A list with the prompt and reference images used (for chain replay).
-#' @noRd
 generate_single_image <- function(
   image_spec,
   base_dir,
@@ -110,12 +102,6 @@ generate_single_image <- function(
   )
 }
 
-#' Replay a conversation chain for builds-on
-#'
-#' @param chat The chat session to replay into.
-#' @param builds_on The name of the image this builds on.
-#' @param generated List of previously generated images.
-#' @noRd
 replay_chain <- function(chat, builds_on, generated) {
   # Find the chain of dependencies
   chain <- character()
