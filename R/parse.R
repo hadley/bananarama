@@ -39,27 +39,65 @@ parse_images <- function(images, defaults) {
     cli::cli_abort("Configuration must contain an {.field images} field.")
   }
 
-  lapply(images, function(img) {
-    if (is.null(img$name)) {
-      cli::cli_abort("Each image must have a {.field name} field.")
-    }
-    if (is.null(img$description)) {
-      cli::cli_abort(
-        "Image {.val {img$name}} must have a {.field description} field."
-      )
-    }
+  lapply(images, parse_image, defaults = defaults)
+}
 
-    # Merge defaults with image-specific overrides
-    list(
-      name = img$name,
-      description = img$description,
-      `builds-on` = img$`builds-on`,
-      model = img$model %||% defaults$model,
-      style = img$style %||% defaults$style,
-      `aspect-ratio` = img$`aspect-ratio` %||% defaults$`aspect-ratio`,
-      resolution = img$resolution %||% defaults$resolution
+parse_image <- function(img, defaults) {
+  if (is.null(img$name)) {
+    cli::cli_abort("Each image must have a {.field name} field.")
+  }
+  if (is.null(img$description)) {
+    cli::cli_abort(
+      "Image {.val {img$name}} must have a {.field description} field."
     )
-  })
+  }
+
+  aspect_ratio <- img$`aspect-ratio` %||% defaults$`aspect-ratio`
+  check_aspect_ratio(aspect_ratio, img$name)
+
+  resolution <- img$resolution %||% defaults$resolution
+  check_resolution(resolution, img$name)
+
+  list(
+    name = img$name,
+    description = img$description,
+    `builds-on` = img$`builds-on`,
+    model = img$model %||% defaults$model,
+    style = img$style %||% defaults$style,
+    `aspect-ratio` = aspect_ratio,
+    resolution = resolution
+  )
+}
+
+check_aspect_ratio <- function(value, name) {
+  valid <- c(
+    "1:1",
+    "2:3",
+    "3:2",
+    "3:4",
+    "4:3",
+    "4:5",
+    "5:4",
+    "9:16",
+    "16:9",
+    "21:9"
+  )
+  if (!value %in% valid) {
+    cli::cli_abort(c(
+      "Image {.val {name}} has invalid {.field aspect-ratio} {.val {value}}.",
+      i = "Must be one of {.or {.val {valid}}}."
+    ))
+  }
+}
+
+check_resolution <- function(value, name) {
+  valid <- c("1K", "2K", "4K")
+  if (!value %in% valid) {
+    cli::cli_abort(c(
+      "Image {.val {name}} has invalid {.field resolution} {.val {value}}.",
+      i = "Must be one of {.or {.val {valid}}}."
+    ))
+  }
 }
 
 resolve_placeholders <- function(description, base_dir, start_index = 0) {

@@ -20,47 +20,55 @@ test_that("parse_defaults extracts values from named list", {
   expect_equal(result$resolution, "2K")
 })
 
-test_that("parse_images errors on missing name", {
-  images <- list(list(description = "A picture"))
-  expect_error(
-    parse_images(images, list()),
-    "name"
-  )
+test_that("parse_image errors on missing name", {
+  expect_error(parse_image(list(description = "A picture"), list()), "name")
 })
 
-test_that("parse_images errors on missing description", {
-  images <- list(list(name = "test"))
-  expect_error(
-    parse_images(images, list()),
-    "description"
-  )
+test_that("parse_image errors on missing description", {
+  expect_error(parse_image(list(name = "test"), list()), "description")
 })
 
-test_that("parse_images merges defaults with overrides", {
+test_that("parse_image merges defaults with overrides", {
   defaults <- list(
     model = "gemini-2.5-flash-image",
     style = "default style",
     `aspect-ratio` = "1:1",
     resolution = "1K"
   )
-  images <- list(
-    list(name = "img1", description = "desc1"),
+
+  result <- parse_image(list(name = "img1", description = "desc1"), defaults)
+  expect_equal(result$model, "gemini-2.5-flash-image")
+  expect_equal(result$style, "default style")
+  expect_equal(result$`aspect-ratio`, "1:1")
+
+  result <- parse_image(
     list(name = "img2", description = "desc2", `aspect-ratio` = "16:9"),
+    defaults
+  )
+  expect_equal(result$style, "default style")
+  expect_equal(result$`aspect-ratio`, "16:9")
+
+  result <- parse_image(
     list(
       name = "img3",
       description = "desc3",
       model = "gemini-3-pro-image-preview"
-    )
+    ),
+    defaults
   )
+  expect_equal(result$model, "gemini-3-pro-image-preview")
+})
 
-  result <- parse_images(images, defaults)
+test_that("parse_image errors on invalid aspect-ratio", {
+  defaults <- parse_defaults(NULL)
+  img <- list(name = "test", description = "desc", `aspect-ratio` = "5:3")
+  expect_snapshot(parse_image(img, defaults), error = TRUE)
+})
 
-  expect_equal(result[[1]]$model, "gemini-2.5-flash-image")
-  expect_equal(result[[1]]$style, "default style")
-  expect_equal(result[[1]]$`aspect-ratio`, "1:1")
-  expect_equal(result[[2]]$style, "default style")
-  expect_equal(result[[2]]$`aspect-ratio`, "16:9")
-  expect_equal(result[[3]]$model, "gemini-3-pro-image-preview")
+test_that("parse_image errors on invalid resolution", {
+  defaults <- parse_defaults(NULL)
+  img <- list(name = "test", description = "desc", resolution = "8K")
+  expect_snapshot(parse_image(img, defaults), error = TRUE)
 })
 
 test_that("resolve_placeholders returns unchanged text without placeholders", {
