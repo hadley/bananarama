@@ -32,28 +32,17 @@ bananarama <- function(
   images <- sort_by_dependencies(config$images)
   images <- preprocess_images(images, config$base_dir, output_dir)
 
-  # Track generated images for builds-on chains
-  generated <- list()
   output_paths <- character()
-
   for (image in images) {
     output_paths <- c(output_paths, image$output_path)
 
     if (!force && file.exists(image$output_path)) {
       cli::cli_alert_info("Skipping {.val {image$name}} (already exists)")
-      generated[[image$name]] <- list(
-        output_path = image$output_path,
-        prompt = image$prompt,
-        ref_images = image$ref_image_paths
-      )
       next
     }
 
     cli::cli_alert("Generating {.val {image$name}}...")
-
-    result <- generate_single_image(image, generated)
-
-    generated[[image$name]] <- result
+    generate_single_image(image, images)
     cli::cli_alert_success("Generated {.val {image$name}}")
   }
 
@@ -61,7 +50,9 @@ bananarama <- function(
 }
 
 preprocess_images <- function(images, base_dir, output_dir) {
-  lapply(images, function(image) {
+  names <- vapply(images, function(x) x$name, character(1))
+
+  images <- lapply(images, function(image) {
     resolved_style <- resolve_placeholders(image$style, base_dir)
 
     n <- length(resolved_style$images)
@@ -82,16 +73,18 @@ preprocess_images <- function(images, base_dir, output_dir) {
     image$ref_images <- ref_images
     image
   })
+
+  stats::setNames(images, names)
 }
 
-generate_single_image <- function(image_spec, generated) {
+generate_single_image <- function(image_spec, images) {
   image_config <- list(aspectRatio = image_spec$`aspect-ratio`)
   if (image_spec$model == "gemini-3-pro-image-preview") {
     image_config$imageSize <- image_spec$resolution
   }
 
   chat <- ellmer::chat_google_gemini(
-    "Draw a picture based on the user's description, carefully following their 
+    "Draw a picture based on the user's description, carefully following their
     specified style. Do not include text unless explicitly requested.",
     model = image_spec$model,
     api_args = list(
@@ -102,52 +95,39 @@ generate_single_image <- function(image_spec, generated) {
   # Handle builds-on chains
   builds_on <- image_spec$`builds-on`
   if (!is.null(builds_on)) {
-    replay_chain(chat, builds_on, generated)
+    replay_chain(chat, builds_on, images)
   }
 
   chat$chat(image_spec$prompt, !!!image_spec$ref_images)
   save_generated_image(chat, image_spec$output_path)
-
-  list(
-    output_path = image_spec$output_path,
-    prompt = image_spec$prompt,
-    ref_images = image_spec$ref_image_paths
-  )
 }
 
-replay_chain <- function(chat, builds_on, generated) {
+replay_chain <- function(chat, builds_on, images) {
   # Find the chain of dependencies
   chain <- character()
   current <- builds_on
 
   while (!is.null(current)) {
-    if (!current %in% names(generated)) {
-      cli::cli_abort(
-        "Cannot find generated image {.val {current}} for builds-on chain."
-      )
+    image <- images[[current]]
+    if (is.null(image)) {
+      cli::cli_abort("Cannot find image {.val {current}} in images list.")
     }
     chain <- c(current, chain)
-
-    # Find what this image built on
-    prev_info <- generated[[current]]
-    # We need to track the builds-on info - for now, assume linear chain
-    current <- NULL
+    current <- image$`builds-on`
   }
 
   # Replay each turn in the chain
   for (name in chain) {
-    info <- generated[[name]]
-    # Replay the original prompt and response
-    user_content <- list(ellmer::content_text(info$prompt))
-    if (length(info$ref_images) > 0) {
-      for (img in info$ref_images) {
-        user_content <- c(user_content, list(ellmer::content_image_file(img)))
-      }
+    image <- images[[name]]
+
+    user_content <- list(ellmer::content_text(image$prompt))
+    for (img in image$ref_images) {
+      user_content <- c(user_content, list(img))
     }
     chat$add_turn("user", user_content)
     chat$add_turn(
       "assistant",
-      list(ellmer::content_image_file(info$output_path))
+      list(ellmer::content_image_file(image$output_path))
     )
   }
 }
