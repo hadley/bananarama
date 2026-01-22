@@ -120,14 +120,14 @@ replay_chain <- function(chat, builds_on, images) {
   for (name in chain) {
     image <- images[[name]]
 
-    user_content <- list(ellmer::content_text(image$prompt))
+    user_content <- list(ellmer::ContentText(image$prompt))
     for (img in image$ref_images) {
       user_content <- c(user_content, list(img))
     }
-    chat$add_turn("user", user_content)
+    assistant_content <- list(ellmer::content_image_file(image$output_path))
     chat$add_turn(
-      "assistant",
-      list(ellmer::content_image_file(image$output_path))
+      ellmer::UserTurn(user_content),
+      ellmer::AssistantTurn(assistant_content, tokens = c(0, 0, 0))
     )
   }
 }
