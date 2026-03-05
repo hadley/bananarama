@@ -6,52 +6,55 @@ defaults:
       aesthetic in reference [style]. The color palette is muted and 
       desaturated. If present, furniture and decor are mid-century modern. 
       The overall mood is calm, cozy, and approachable. 
-      The image should always take up the whole frame.
+      Do not include any borders; the image MUST take up the full frame.
       
   aspect-ratio: 16:9
   resolution: 1K
 
 images:
-  - name: the-genie-is-out
+  - name: 01-the-genie-is-out
     description:
       Draw a picture of [hadley] trying to stuff a genie back into a lamp.
       The genie should be a hybrid genie-robot that looks a bit like [robot].
+      Hadley should look unhappy and be visibly straining to get the genie
+      back in the lamp. The genie should be trying to escape.
 
-  - name: still-joyful
+  - name: 02-still-joyful
     description: >
       Draw a picture of [hadley] and [robot] having a great time together.
+      They should be dancing around and visibly happy.
 
-  - name: it-still-feels-like-programming
+  - name: 03-it-still-feels-like-programming
     description: >
       Draw a two panel image. On the left, show [hadley] typing into a 
       typewriter. On the right, show him lying on a therapy couch 
       (chaise lounge) talking while a [robot] takes notes.
 
-  - name: robot-factory
+  - name: 04-robot-factory
     description: >
       Draw a picture of [hadley] overseeing factory full of robots, that
       generally look like [robot]. The robots should be typing at computers.
 
-  - name: typing-vs-clauding
+  - name: 05-typing-vs-clauding
     description: >
       Draw a two panel image. On the left, show a [hadley] writing with a 
       pen and quill. On the right, show him pacing around a room dictating to 
       a [robot] who is typing at a computer.
 
-  - name: mad-max
+  - name: 06-mad-max
     description: >
       Draw a picture of a mad max style road race with gas town boys, metal 
       musicians, gouts of flame, chasing through a post apocalyptic desert. 
       But make all the humans robots.
 
-  - name: quality
+  - name: 07-quality
     description:
       Draw a team of meticulous robot scientists writing on whiteboards,
       solving a challenging programming problem. One robot should wear glasses.
       Another should have a tie. A third should have a pocket protector.
       They should look like nerdy versions of [robot].
 
-  - name: sweat-the-details
+  - name: 08-sweat-the-details
     description: >
       A split-screen photograph or a diptych of an artist, [Hadley], in a studio.
 
@@ -65,15 +68,15 @@ images:
       easel is a vibrant, incredibly detailed masterpiece that seems to glow 
       with its own light. The studio around them feels organized and energized.
 
-  - name: directions
+  - name: 09-cruising
     description: >
-      Draw a picture of a [robot] chauffeur driving a car with [hadley] in the 
+      Draw a picture of a [robot] chauffeur driving a blue car with [hadley] in the 
+      backseat. The car should crusing over a hill with the robot and hadley 
+      looking happy.
+
+  - name: 10-directions
+    description: >
+      Draw a picture of a [robot] chauffeur driving a blue car with [hadley] in the 
       backseat. The car should be stopped in front of a signpost with many 
       signs and the robot is looking at all the signs confused, wondering which 
       way to go.
-
-  - name: lost
-    builds-on: directions
-    description: >
-      Now redraw the robot confidently and happily driving over a hill. 
-      No signpost
