@@ -10,8 +10,10 @@ bananarama(path = "bananarama.yaml", output_dir = NULL, force = FALSE)
 \item{path}{Path to a YAML configuration file or a directory containing
 \code{bananarama.yaml}. Defaults to \code{"bananarama.yaml"} in the current directory.}
 
-\item{output_dir}{Directory to save generated images. Defaults to an
-\verb{output/} subdirectory next to the configuration file.}
+\item{output_dir}{Directory to save generated images. Defaults to the
+\code{output-dir} field in the YAML defaults (interpreted relative to the
+configuration file), or \verb{output/} next to the configuration file if
+unset.}
 
 \item{force}{If \code{TRUE}, regenerate all images even if they already exist.}
 }

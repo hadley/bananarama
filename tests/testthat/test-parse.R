@@ -137,6 +137,31 @@ test_that("find_image_file finds jpg files", {
   expect_equal(result, file.path(tmp, "test.jpg"))
 })
 
+test_that("parse_image_config uses output-dir from defaults", {
+  tmp <- withr::local_tempdir()
+  yaml::write_yaml(
+    list(
+      defaults = list(`output-dir` = "imgs"),
+      images = list(list(name = "test", description = "desc"))
+    ),
+    file.path(tmp, "bananarama.yaml")
+  )
+
+  result <- parse_image_config(file.path(tmp, "bananarama.yaml"))
+  expect_equal(result$output_dir, file.path(tmp, "imgs"))
+})
+
+test_that("parse_image_config returns NULL output_dir when not specified", {
+  tmp <- withr::local_tempdir()
+  yaml::write_yaml(
+    list(images = list(list(name = "test", description = "desc"))),
+    file.path(tmp, "bananarama.yaml")
+  )
+
+  result <- parse_image_config(file.path(tmp, "bananarama.yaml"))
+  expect_null(result$output_dir)
+})
+
 test_that("find_image_file errors on missing file", {
   tmp <- withr::local_tempdir()
   expect_error(
