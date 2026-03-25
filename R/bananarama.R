@@ -3,8 +3,8 @@
 #' @param path Path to a YAML configuration file or a directory containing
 #'   `bananarama.yaml`. Defaults to `"bananarama.yaml"` in the current directory.
 #' @param output_dir Directory to save generated images. Defaults to the
-#'   `output-dir` field in the YAML defaults (interpreted relative to the
-#'   configuration file), or `output/` next to the configuration file if
+#'   top-level `output-dir` field in the YAML file (interpreted relative to
+#'   the configuration file), or `output/` next to the configuration file if
 #'   unset.
 #' @param force If `TRUE`, regenerate all images even if they already exist.
 #' @return Invisibly returns a character vector of output file paths.
@@ -36,16 +36,19 @@ bananarama <- function(
 
   output_paths <- character()
   for (image in images) {
-    output_paths <- c(output_paths, image$output_path)
+    for (output_path in image$output_paths) {
+      output_paths <- c(output_paths, output_path)
+      label <- basename(output_path)
 
-    if (!force && file.exists(image$output_path)) {
-      cli::cli_alert_info("Skipping {.val {image$name}} (already exists)")
-      next
+      if (!force && file.exists(output_path)) {
+        cli::cli_alert_info("Skipping {.val {label}} (already exists)")
+        next
+      }
+
+      cli::cli_alert("Generating {.val {label}}...")
+      generate_single_image(image, images, output_path)
+      cli::cli_alert_success("Generated {.val {label}}")
     }
-
-    cli::cli_alert("Generating {.val {image$name}}...")
-    generate_single_image(image, images)
-    cli::cli_alert_success("Generated {.val {image$name}}")
   }
 
   invisible(output_paths)
@@ -69,17 +72,27 @@ preprocess_images <- function(images, base_dir, output_dir) {
     ref_image_paths <- c(resolved_style$images, resolved_desc$images)
     ref_images <- lapply(ref_image_paths, ellmer::content_image_file)
 
-    image$output_path <- file.path(output_dir, paste0(image$name, ".png"))
     image$prompt <- prompt
     image$ref_image_paths <- ref_image_paths
     image$ref_images <- ref_images
+
+    n <- image[["n"]] %||% 1L
+    if (n > 1L) {
+      suffixed_names <- paste0(image$name, "-", seq_len(n))
+    } else {
+      suffixed_names <- image$name
+    }
+    image$output_paths <- file.path(
+      output_dir,
+      paste0(suffixed_names, ".png")
+    )
     image
   })
 
   stats::setNames(images, names)
 }
 
-generate_single_image <- function(image_spec, images) {
+generate_single_image <- function(image_spec, images, output_path) {
   image_config <- list(aspectRatio = image_spec$`aspect-ratio`)
   if (image_spec$model == "gemini-3-pro-image-preview") {
     image_config$imageSize <- image_spec$resolution
@@ -101,7 +114,7 @@ generate_single_image <- function(image_spec, images) {
   }
 
   chat$chat(image_spec$prompt, !!!image_spec$ref_images)
-  save_generated_image(chat, image_spec$output_path)
+  save_generated_image(chat, output_path)
 }
 
 replay_chain <- function(chat, builds_on, images) {
@@ -126,7 +139,9 @@ replay_chain <- function(chat, builds_on, images) {
     for (img in image$ref_images) {
       user_content <- c(user_content, list(img))
     }
-    assistant_content <- list(ellmer::content_image_file(image$output_path))
+    assistant_content <- list(ellmer::content_image_file(image$output_paths[[
+      1
+    ]]))
     chat$add_turn(
       ellmer::UserTurn(user_content),
       ellmer::AssistantTurn(assistant_content, tokens = c(0, 0, 0))

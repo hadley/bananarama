@@ -46,7 +46,8 @@ test_that("parse_image merges defaults with overrides", {
     model = "gemini-2.5-flash-image",
     style = "default style",
     `aspect-ratio` = "1:1",
-    resolution = "1K"
+    resolution = "1K",
+    n = 1L
   )
 
   result <- parse_image(list(name = "img1", description = "desc1"), defaults)
@@ -137,11 +138,11 @@ test_that("find_image_file finds jpg files", {
   expect_equal(result, file.path(tmp, "test.jpg"))
 })
 
-test_that("parse_image_config uses output-dir from defaults", {
+test_that("parse_image_config uses top-level output-dir", {
   tmp <- withr::local_tempdir()
-  yaml::write_yaml(
+  yaml12::write_yaml(
     list(
-      defaults = list(`output-dir` = "imgs"),
+      `output-dir` = "imgs",
       images = list(list(name = "test", description = "desc"))
     ),
     file.path(tmp, "bananarama.yaml")
@@ -153,7 +154,7 @@ test_that("parse_image_config uses output-dir from defaults", {
 
 test_that("parse_image_config returns NULL output_dir when not specified", {
   tmp <- withr::local_tempdir()
-  yaml::write_yaml(
+  yaml12::write_yaml(
     list(images = list(list(name = "test", description = "desc"))),
     file.path(tmp, "bananarama.yaml")
   )

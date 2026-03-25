@@ -1,4 +1,5 @@
 resolve_config_path <- function(path) {
+  path <- path.expand(path)
   if (dir.exists(path)) {
     path <- file.path(path, "bananarama.yaml")
   }
@@ -11,13 +12,13 @@ resolve_config_path <- function(path) {
 }
 
 parse_image_config <- function(config_path) {
-  config <- yaml::read_yaml(config_path)
+  config <- yaml12::read_yaml(config_path)
 
   defaults <- parse_defaults(config$defaults)
   images <- parse_images(config$images, defaults)
 
   base_dir <- dirname(config_path)
-  output_dir <- config$defaults$`output-dir`
+  output_dir <- config$`output-dir`
   if (!is.null(output_dir) && !startsWith(output_dir, "/")) {
     output_dir <- file.path(base_dir, output_dir)
   }
@@ -36,7 +37,8 @@ parse_defaults <- function(values) {
     description = NULL,
     style = NULL,
     `aspect-ratio` = "1:1",
-    resolution = "1K"
+    resolution = "1K",
+    n = 1L
   )
 
   utils::modifyList(defaults, values %||% list())
@@ -67,6 +69,11 @@ parse_image <- function(img, defaults) {
   resolution <- img$resolution %||% defaults$resolution
   check_resolution(resolution, img$name)
 
+  n <- as.integer(img[["n"]] %||% defaults$n %||% 1L)
+  if (n < 1L) {
+    cli::cli_abort("Image {.val {img$name}} must have {.field n} >= 1.")
+  }
+
   list(
     name = img$name,
     description = description,
@@ -74,7 +81,8 @@ parse_image <- function(img, defaults) {
     model = img$model %||% defaults$model,
     style = img$style %||% defaults$style,
     `aspect-ratio` = aspect_ratio,
-    resolution = resolution
+    resolution = resolution,
+    n = n
   )
 }
 

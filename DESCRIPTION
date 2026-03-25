@@ -15,7 +15,7 @@ RoxygenNote: 7.3.3.9000
 Imports:
     cli,
     ellmer,
-    yaml
+    yaml12
 Suggests:
     testthat (>= 3.0.0),
     withr
