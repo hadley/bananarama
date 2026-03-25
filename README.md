@@ -3,7 +3,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-bananarama generates presentation images using Google Gemini's image generation capabilities. Define your images in a YAML configuration file with support for reference images, style defaults, and image dependencies.
+bananarama generates presentation images using Google Gemini's image generation capabilities. Define your images in a YAML configuration file with support for reference images and style defaults.
 
 ## Installation
 
@@ -30,12 +30,6 @@ images:
     description: >
       Draw a picture of [hadley] overseeing a factory full of robots.
       The robots should be typing at computers.
-
-  - name: robot-close-up
-    builds-on: robot-factory
-    description: >
-      Now zoom in on one of the robots at a computer. Show the
-      screen displaying colorful code.
 ```
 
 Reference images like `[hadley]` are matched to image files (e.g. `hadley.png`) in the same directory as the YAML file.

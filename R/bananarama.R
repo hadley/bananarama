@@ -29,10 +29,7 @@ bananarama <- function(
     dir.create(output_dir, recursive = TRUE)
   }
 
-  # Sort images by dependencies and preprocess
-
-  images <- sort_by_dependencies(config$images)
-  images <- preprocess_images(images, config$base_dir, output_dir)
+  images <- preprocess_images(config$images, config$base_dir, output_dir)
 
   output_paths <- character()
   for (image in images) {
@@ -46,7 +43,7 @@ bananarama <- function(
       }
 
       cli::cli_alert("Generating {.val {label}}...")
-      generate_single_image(image, images, output_path)
+      generate_single_image(image, output_path)
       cli::cli_alert_success("Generated {.val {label}}")
     }
   }
@@ -92,7 +89,7 @@ preprocess_images <- function(images, base_dir, output_dir) {
   stats::setNames(images, names)
 }
 
-generate_single_image <- function(image_spec, images, output_path) {
+generate_single_image <- function(image_spec, output_path) {
   image_config <- list(aspectRatio = image_spec$`aspect-ratio`)
   if (image_spec$model == "gemini-3-pro-image-preview") {
     image_config$imageSize <- image_spec$resolution
@@ -107,46 +104,8 @@ generate_single_image <- function(image_spec, images, output_path) {
     )
   )
 
-  # Handle builds-on chains
-  builds_on <- image_spec$`builds-on`
-  if (!is.null(builds_on)) {
-    replay_chain(chat, builds_on, images)
-  }
-
   chat$chat(image_spec$prompt, !!!image_spec$ref_images)
   save_generated_image(chat, output_path)
-}
-
-replay_chain <- function(chat, builds_on, images) {
-  # Find the chain of dependencies
-  chain <- character()
-  current <- builds_on
-
-  while (!is.null(current)) {
-    image <- images[[current]]
-    if (is.null(image)) {
-      cli::cli_abort("Cannot find image {.val {current}} in images list.")
-    }
-    chain <- c(current, chain)
-    current <- image$`builds-on`
-  }
-
-  # Replay each turn in the chain
-  for (name in chain) {
-    image <- images[[name]]
-
-    user_content <- list(ellmer::ContentText(image$prompt))
-    for (img in image$ref_images) {
-      user_content <- c(user_content, list(img))
-    }
-    assistant_content <- list(ellmer::content_image_file(image$output_paths[[
-      1
-    ]]))
-    chat$add_turn(
-      ellmer::UserTurn(user_content),
-      ellmer::AssistantTurn(assistant_content, tokens = c(0, 0, 0))
-    )
-  }
 }
 
 save_generated_image <- function(chat, output_path) {

@@ -77,7 +77,6 @@ parse_image <- function(img, defaults) {
   list(
     name = img$name,
     description = description,
-    `builds-on` = img$`builds-on`,
     model = img$model %||% defaults$model,
     style = img$style %||% defaults$style,
     `aspect-ratio` = aspect_ratio,
