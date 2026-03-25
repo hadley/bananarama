@@ -55,7 +55,7 @@ Images that already exist are skipped unless you pass `force = TRUE`.
 
 ### `output-dir`
 
-Output directory for generated images, relative to the YAML file.
+Output directory for generated images, relative to the YAML file. Defaults to a directory with the same name as the YAML file (e.g. `bananarama.yaml` outputs to `bananarama/`).
 
 ### `images`
 

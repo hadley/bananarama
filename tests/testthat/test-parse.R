@@ -149,7 +149,7 @@ test_that("parse_image_config uses top-level output-dir", {
   )
 
   result <- parse_image_config(file.path(tmp, "bananarama.yaml"))
-  expect_equal(result$output_dir, file.path(tmp, "imgs"))
+  expect_equal(result$output_dir, "imgs")
 })
 
 test_that("parse_image_config returns NULL output_dir when not specified", {

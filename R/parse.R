@@ -17,16 +17,10 @@ parse_image_config <- function(config_path) {
   defaults <- parse_defaults(config$defaults)
   images <- parse_images(config$images, defaults)
 
-  base_dir <- dirname(config_path)
-  output_dir <- config$`output-dir`
-  if (!is.null(output_dir) && !startsWith(output_dir, "/")) {
-    output_dir <- file.path(base_dir, output_dir)
-  }
-
   list(
     images = images,
-    base_dir = base_dir,
-    output_dir = output_dir
+    base_dir = dirname(config_path),
+    output_dir = config$`output-dir`
   )
 }
 

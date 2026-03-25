@@ -2,10 +2,10 @@
 #'
 #' @param path Path to a YAML configuration file or a directory containing
 #'   `bananarama.yaml`. Defaults to `"bananarama.yaml"` in the current directory.
-#' @param output_dir Directory to save generated images. Defaults to the
-#'   top-level `output-dir` field in the YAML file (interpreted relative to
-#'   the configuration file), or `output/` next to the configuration file if
-#'   unset.
+#' @param output_dir Directory to save generated images, relative to the
+#'   YAML configuration file (or an absolute path). Defaults to the
+#'   `output-dir` field in the YAML file, or a directory with the same name
+#'   as the YAML file (e.g. `bananarama.yaml` outputs to `bananarama/`).
 #' @param force If `TRUE`, regenerate all images even if they already exist.
 #' @return Invisibly returns a character vector of output file paths.
 #' @export
@@ -22,8 +22,10 @@ bananarama <- function(
   config_path <- resolve_config_path(path)
   config <- parse_image_config(config_path)
 
-  if (is.null(output_dir)) {
-    output_dir <- config$output_dir %||% file.path(config$base_dir, "output")
+  default_dir <- tools::file_path_sans_ext(basename(config_path))
+  output_dir <- output_dir %||% config$output_dir %||% default_dir
+  if (!startsWith(output_dir, "/")) {
+    output_dir <- file.path(config$base_dir, output_dir)
   }
   if (!dir.exists(output_dir)) {
     dir.create(output_dir, recursive = TRUE)
