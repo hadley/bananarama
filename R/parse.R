@@ -24,7 +24,6 @@ parse_image_config <- function(config_path) {
   }
 
   list(
-    defaults = defaults,
     images = images,
     base_dir = base_dir,
     output_dir = output_dir

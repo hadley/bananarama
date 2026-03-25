@@ -52,41 +52,39 @@ bananarama <- function(
 }
 
 preprocess_images <- function(images, base_dir, output_dir) {
-  names <- vapply(images, function(x) x$name, character(1))
+  lapply(images, preprocess_image, base_dir = base_dir, output_dir = output_dir)
+}
 
-  images <- lapply(images, function(image) {
-    resolved_style <- resolve_placeholders(image$style, base_dir)
+preprocess_image <- function(image, base_dir, output_dir) {
+  resolved_style <- resolve_placeholders(image$style, base_dir)
 
-    n <- length(resolved_style$images)
-    resolved_desc <- resolve_placeholders(image$description, base_dir, n)
-    prompt <- paste(
-      c(
-        resolved_desc$text,
-        paste0("Style: ", resolved_style$text, recycle0 = TRUE)
-      ),
-      collapse = "\n\n"
-    )
-    ref_image_paths <- c(resolved_style$images, resolved_desc$images)
-    ref_images <- lapply(ref_image_paths, ellmer::content_image_file)
+  n <- length(resolved_style$images)
+  resolved_desc <- resolve_placeholders(image$description, base_dir, n)
+  prompt <- paste(
+    c(
+      resolved_desc$text,
+      paste0("Style: ", resolved_style$text, recycle0 = TRUE)
+    ),
+    collapse = "\n\n"
+  )
+  ref_image_paths <- c(resolved_style$images, resolved_desc$images)
+  ref_images <- lapply(ref_image_paths, ellmer::content_image_file)
 
-    image$prompt <- prompt
-    image$ref_image_paths <- ref_image_paths
-    image$ref_images <- ref_images
+  image$prompt <- prompt
+  image$ref_image_paths <- ref_image_paths
+  image$ref_images <- ref_images
 
-    n <- image[["n"]] %||% 1L
-    if (n > 1L) {
-      suffixed_names <- paste0(image$name, "-", seq_len(n))
-    } else {
-      suffixed_names <- image$name
-    }
-    image$output_paths <- file.path(
-      output_dir,
-      paste0(suffixed_names, ".png")
-    )
-    image
-  })
-
-  stats::setNames(images, names)
+  n <- image[["n"]] %||% 1L
+  if (n > 1L) {
+    suffixed_names <- paste0(image$name, "-", seq_len(n))
+  } else {
+    suffixed_names <- image$name
+  }
+  image$output_paths <- file.path(
+    output_dir,
+    paste0(suffixed_names, ".png")
+  )
+  image
 }
 
 generate_single_image <- function(image_spec, output_path) {
