@@ -3,11 +3,11 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-bananarama generates presentation images using Google Gemini's image generation capabilities. Define your images in a YAML configuration file with support for reference images and style defaults.
+bananarama generates presentation images using Google Gemini. Define your images in a YAML configuration file with support for reference images and style defaults. Using gemini to generate slide images usually means a tedious loop of copying prompts into a web UI, downloading images, tweaking, and repeating. bananarama makes this process reproducible: your prompts live in version-controlled YAML, and regenerating every image is a single function call. No more copy-paste, no more losing track of which prompt produced which image. It also generates all images in parallel, making it wicked fast to generate full deck of images.
 
 ## Installation
 
-You can install the development version of bananarama from [GitHub](https://github.com/hadley/bananarama):
+You can install the development version of bananarama from GitHub:
 
 ``` r
 # install.packages("pak")
@@ -46,12 +46,12 @@ Images that already exist are skipped unless you pass `force = TRUE`.
 
 ### `defaults`
 
-- **`style`**: Style prompt appended to every image description.
-- **`description`**: Default description (useful if you just want to experiment with styles).
+- **`style`**: Style prompt appended to every image description. Use this to ensure a consistent style across all slides.
+- **`description`**: Default description; not usually needed unless you want to experiment with styles.
 - **`aspect-ratio`**: One of `"1:1"`, `"3:2"`, `"16:9"`, etc. Default: `"16:9"`.
 - **`resolution`**: One of `"1K"`, `"2K"`, `"4K"`. Default: `"1K"`.
 - **`n`**: Number of variants to generate per image. Default: `1`.
-- **`model`**: Gemini model to use. Default: `"gemini-3.1-flash-image-preview"`.
+- **`model`**: Gemini model to use. Default: `"gemini-3.1-flash-image-preview"` (aka nano banana2).
 
 ### `output-dir`
 
