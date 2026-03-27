@@ -1,4 +1,4 @@
-# bananarama
+# bananarama <a href="https://hadley.github.io/bananarama/"><img src="man/figures/logo.png" align="right" height="136" alt="bananarama website" /></a>
 
 <!-- badges: start -->
 <!-- badges: end -->
