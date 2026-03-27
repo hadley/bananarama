@@ -48,7 +48,7 @@ Images that already exist are skipped unless you pass `force = TRUE`.
 
 - **`style`**: Style prompt appended to every image description.
 - **`description`**: Default description (useful if you just want to experiment with styles).
-- **`aspect-ratio`**: One of `"1:1"`, `"3:2"`, `"16:9"`, etc. Default: `"1:1"`.
+- **`aspect-ratio`**: One of `"1:1"`, `"3:2"`, `"16:9"`, etc. Default: `"16:9"`.
 - **`resolution`**: One of `"1K"`, `"2K"`, `"4K"`. Default: `"1K"`.
 - **`n`**: Number of variants to generate per image. Default: `1`.
 - **`model`**: Gemini model to use. Default: `"gemini-3.1-flash-image-preview"`.

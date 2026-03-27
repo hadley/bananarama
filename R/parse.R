@@ -29,7 +29,7 @@ parse_defaults <- function(values) {
     model = "gemini-3.1-flash-image-preview",
     description = NULL,
     style = NULL,
-    `aspect-ratio` = "1:1",
+    `aspect-ratio` = "16:9",
     resolution = "1K",
     n = 1L
   )

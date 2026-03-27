@@ -2,7 +2,7 @@ test_that("parse_defaults handles missing defaults", {
   result <- parse_defaults(NULL)
   expect_equal(result$model, "gemini-3.1-flash-image-preview")
   expect_null(result$style)
-  expect_equal(result$`aspect-ratio`, "1:1")
+  expect_equal(result$`aspect-ratio`, "16:9")
   expect_equal(result$resolution, "1K")
 })
 
@@ -45,7 +45,7 @@ test_that("parse_image merges defaults with overrides", {
   defaults <- list(
     model = "gemini-2.5-flash-image",
     style = "default style",
-    `aspect-ratio` = "1:1",
+    `aspect-ratio` = "16:9",
     resolution = "1K",
     n = 1L
   )
@@ -53,14 +53,14 @@ test_that("parse_image merges defaults with overrides", {
   result <- parse_image(list(name = "img1", description = "desc1"), defaults)
   expect_equal(result$model, "gemini-2.5-flash-image")
   expect_equal(result$style, "default style")
-  expect_equal(result$`aspect-ratio`, "1:1")
+  expect_equal(result$`aspect-ratio`, "16:9")
 
   result <- parse_image(
-    list(name = "img2", description = "desc2", `aspect-ratio` = "16:9"),
+    list(name = "img2", description = "desc2", `aspect-ratio` = "1:1"),
     defaults
   )
   expect_equal(result$style, "default style")
-  expect_equal(result$`aspect-ratio`, "16:9")
+  expect_equal(result$`aspect-ratio`, "1:1")
 
   result <- parse_image(
     list(
