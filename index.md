@@ -64,6 +64,10 @@ Images that already exist are skipped unless you pass `force = TRUE`.
 - **`n`**: Number of variants to generate per image. Default: `1`.
 - **`model`**: Gemini model to use. Default:
   `"gemini-3.1-flash-image-preview"` (aka nano banana2).
+- **`force`**: If `true`, regenerate images even if they already exist.
+  Default: `false`.
+- **`seed`**: Integer seed for the random number generator. Makes output
+  more (but not perfectly) deterministic.
 
 ### `output-dir`
 
@@ -81,5 +85,5 @@ Each image has:
   directory.
 - **`n`**: Number of variants to generate. Output files are named
   `{name}-1.png`, `{name}-2.png`, etc. Default: `1`.
-- **`style`**, **`aspect-ratio`**, **`resolution`**, **`model`**:
-  Per-image overrides of the defaults.
+- **`style`**, **`aspect-ratio`**, **`resolution`**, **`model`**,
+  **`force`**, **`seed`**: Per-image overrides of the defaults.

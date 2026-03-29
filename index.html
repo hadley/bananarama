@@ -110,6 +110,10 @@
 <strong><code>n</code></strong>: Number of variants to generate per image. Default: <code>1</code>.</li>
 <li>
 <strong><code>model</code></strong>: Gemini model to use. Default: <code>"gemini-3.1-flash-image-preview"</code> (aka nano banana2).</li>
+<li>
+<strong><code>force</code></strong>: If <code>true</code>, regenerate images even if they already exist. Default: <code>false</code>.</li>
+<li>
+<strong><code>seed</code></strong>: Integer seed for the random number generator. Makes output more (but not perfectly) deterministic.</li>
 </ul>
 </div>
 <div class="section level3">
@@ -131,7 +135,7 @@
 <li>
 <strong><code>n</code></strong>: Number of variants to generate. Output files are named <code>{name}-1.png</code>, <code>{name}-2.png</code>, etc. Default: <code>1</code>.</li>
 <li>
-<strong><code>style</code></strong>, <strong><code>aspect-ratio</code></strong>, <strong><code>resolution</code></strong>, <strong><code>model</code></strong>: Per-image overrides of the defaults.</li>
+<strong><code>style</code></strong>, <strong><code>aspect-ratio</code></strong>, <strong><code>resolution</code></strong>, <strong><code>model</code></strong>, <strong><code>force</code></strong>, <strong><code>seed</code></strong>: Per-image overrides of the defaults.</li>
 </ul>
 </div>
 </div>
