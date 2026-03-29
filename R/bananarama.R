@@ -68,7 +68,7 @@ build_tasks <- function(images, force = FALSE) {
   tasks <- list()
   for (image in images) {
     for (output_path in image$output_paths) {
-      if (!force && file.exists(output_path)) {
+      if (!force && !image$force && file.exists(output_path)) {
         cli::cli_alert_info(
           "Skipping {.val {basename(output_path)}} (already exists)"
         )

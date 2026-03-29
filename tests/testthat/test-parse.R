@@ -73,6 +73,22 @@ test_that("parse_image merges defaults with overrides", {
   expect_equal(result$model, "gemini-3-pro-image-preview")
 })
 
+test_that("parse_image uses force from defaults and overrides", {
+  defaults <- parse_defaults(NULL)
+  result <- parse_image(list(name = "test", description = "desc"), defaults)
+  expect_false(result$force)
+
+  defaults <- parse_defaults(list(force = TRUE))
+  result <- parse_image(list(name = "test", description = "desc"), defaults)
+  expect_true(result$force)
+
+  result <- parse_image(
+    list(name = "test", description = "desc", force = FALSE),
+    defaults
+  )
+  expect_false(result$force)
+})
+
 test_that("parse_image errors on invalid aspect-ratio", {
   defaults <- parse_defaults(NULL)
   img <- list(name = "test", description = "desc", `aspect-ratio` = "5:3")

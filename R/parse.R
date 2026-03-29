@@ -31,7 +31,8 @@ parse_defaults <- function(values) {
     style = NULL,
     `aspect-ratio` = "16:9",
     resolution = "1K",
-    n = 1L
+    n = 1L,
+    force = FALSE
   )
 
   utils::modifyList(defaults, values %||% list())
@@ -67,6 +68,8 @@ parse_image <- function(img, defaults) {
     cli::cli_abort("Image {.val {img$name}} must have {.field n} >= 1.")
   }
 
+  force <- img$force %||% defaults$force %||% FALSE
+
   list(
     name = img$name,
     description = description,
@@ -74,7 +77,8 @@ parse_image <- function(img, defaults) {
     style = img$style %||% defaults$style,
     `aspect-ratio` = aspect_ratio,
     resolution = resolution,
-    n = n
+    n = n,
+    force = force
   )
 }
 
