@@ -1,0 +1,45 @@
+---
+title: "Styles"
+---
+
+```{r}
+#| include: false
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+To help get your create juices flowing, this vignette shows a banana rendered in a variety of styles. You can find the complete source in [`styles.yml`](https://github.com/hadley/bananarama/blob/main/vignettes/articles/styles.yml).
+
+```{r}
+#| eval: false
+#| include: false
+library(bananarama)
+paths <- bananarama("styles.yml")
+
+library(magick)
+files <- list.files("vignettes/articles/styles", full.names = TRUE)
+for (file in files) {
+  img <- image_read(file)
+  img <- image_resize(img, "300x")
+  image_write(img, file)
+  cat("Resized", file, "\n")
+}
+```
+
+```{r}
+#| echo: false
+#| results: asis
+config <- yaml12::read_yaml("styles.yml")
+for (image in config$images) {
+  path <- file.path("styles", paste0(image$name, ".png"))
+  if (!file.exists(path)) {
+    next
+  }
+
+  cat("## ", image$name, "\n\n", sep = "")
+  cat("*", trimws(image$style), "*\n\n", sep = "")
+  cat("![](", path, ")\n\n", sep = "")
+}
+```
