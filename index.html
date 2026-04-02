@@ -39,6 +39,13 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/randomness.html">Randomness and seeds</a></li>
+    <li><a class="dropdown-item" href="articles/styles.html">Styles</a></li>
+  </ul>
+</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -60,7 +67,8 @@
 </div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p>bananarama generates presentation images using Google Gemini. Define your images in a YAML configuration file with support for reference images and style defaults. Using gemini to generate slide images usually means a tedious loop of copying prompts into a web UI, downloading images, tweaking, and repeating. bananarama makes this process reproducible: your prompts live in version-controlled YAML, and regenerating every image is a single function call. No more copy-paste, no more losing track of which prompt produced which image. It also generates all images in parallel, making it wicked fast to generate full deck of images.</p>
+<p>bananarama generates slide backgrounds with Google Gemini. Define your images in a YAML configuration file with support for reference images and style defaults, then generate images in parallel, making it fast to generate full deck of images.</p>
+<p>bananarama avoids the usual tedious loop of copying prompts into a web UI, downloading images, tweaking, and repeating. Now your process is (mostly) reproducible: your prompts live in version-controlled YAML, and regenerating every image is a single function call. No more copy-paste and no more losing track of which prompt produced which image.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -77,18 +85,18 @@
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">  style</span><span class="kw">: </span><span class="ch">&gt;</span></span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>    Flat vector editorial illustration with a muted, desaturated</span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>    color palette. Mid-century modern aesthetic. Calm and approachable.</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="at">  </span><span class="fu">aspect-ratio</span><span class="kw">:</span><span class="at"> </span><span class="dv">16:9</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">images</span><span class="kw">:</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> robot-factory</span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">    description</span><span class="kw">: </span><span class="ch">&gt;</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>      Draw a picture of [hadley] overseeing a factory full of robots.</span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>      The robots should be typing at computers.</span></code></pre></div>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">images</span><span class="kw">:</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> robot-factory</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">    description</span><span class="kw">: </span><span class="ch">&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>      Draw a picture of [hadley] overseeing a factory full of robots.</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>      The robots should be typing at computers.</span></code></pre></div>
 <p>Reference images like <code>[hadley]</code> are matched to image files (e.g. <code>hadley.png</code>) in the same directory as the YAML file.</p>
 <p>Then generate the images with:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">bananarama</span><span class="fu">::</span><span class="fu"><a href="reference/bananarama.html">bananarama</a></span><span class="op">(</span><span class="st">"path/to/bananarama.yaml"</span><span class="op">)</span></span></code></pre></div>
 <p>Images that already exist are skipped unless you pass <code>force = TRUE</code>.</p>
+<p>Bananrama currently uses nano banana2 (akaa <code>gemini-3.1-flash-image-preview</code>), which costs around $0.07 per image.</p>
 </div>
 <div class="section level2">
 <h2 id="yaml-configuration">YAML configuration<a class="anchor" aria-label="anchor" href="#yaml-configuration"></a>

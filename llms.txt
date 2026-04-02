@@ -1,15 +1,15 @@
 # bananarama
 
-bananarama generates presentation images using Google Gemini. Define
-your images in a YAML configuration file with support for reference
-images and style defaults. Using gemini to generate slide images usually
-means a tedious loop of copying prompts into a web UI, downloading
-images, tweaking, and repeating. bananarama makes this process
-reproducible: your prompts live in version-controlled YAML, and
-regenerating every image is a single function call. No more copy-paste,
-no more losing track of which prompt produced which image. It also
-generates all images in parallel, making it wicked fast to generate full
-deck of images.
+bananarama generates slide backgrounds with Google Gemini. Define your
+images in a YAML configuration file with support for reference images
+and style defaults, then generate images in parallel, making it fast to
+generate full deck of images.
+
+bananarama avoids the usual tedious loop of copying prompts into a web
+UI, downloading images, tweaking, and repeating. Now your process is
+(mostly) reproducible: your prompts live in version-controlled YAML, and
+regenerating every image is a single function call. No more copy-paste
+and no more losing track of which prompt produced which image.
 
 ## Installation
 
@@ -30,7 +30,6 @@ defaults:
   style: >
     Flat vector editorial illustration with a muted, desaturated
     color palette. Mid-century modern aesthetic. Calm and approachable.
-  aspect-ratio: 16:9
 
 images:
   - name: robot-factory
@@ -49,6 +48,9 @@ bananarama::bananarama("path/to/bananarama.yaml")
 ```
 
 Images that already exist are skipped unless you pass `force = TRUE`.
+
+Bananrama currently uses nano banana2 (akaa
+`gemini-3.1-flash-image-preview`), which costs around \$0.07 per image.
 
 ## YAML configuration
 
@@ -95,3 +97,10 @@ Each image has:
 - [`bananarama()`](https://hadley.github.io/bananarama/reference/bananarama.md)
   : Generate presentation images from a YAML configuration
 
+# Articles
+
+### All vignettes
+
+- [Randomness and
+  seeds](https://hadley.github.io/bananarama/articles/randomness.md):
+- [Styles](https://hadley.github.io/bananarama/articles/styles.md):
