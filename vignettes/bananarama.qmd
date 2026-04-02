@@ -14,10 +14,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(bananarama)
-```
-
 bananarama makes it easy to generate multiple consistent images for use in a slide deck. You create a YAML file like this:
 
 ```yaml
@@ -37,7 +33,7 @@ images:
     description: Two bananas fighting on a plate
 ```
 
-Then call `bananarama()` to generate the images.
+Then call `bananarama::bananarama()` to generate the images.
 
 But how do you use bananarama effectively for presentation images? Here's some advice that I have developed through trial and error:
 
