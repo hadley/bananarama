@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Randomness and seeds • bananarama</title>
+<title>bananarama • bananarama</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -15,10 +15,10 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="randomness_files/libs/quarto-html/popper.min.js"></script><script src="randomness_files/libs/quarto-html/tippy.umd.min.js"></script><link href="randomness_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="randomness_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="bananarama_files/libs/quarto-html/popper.min.js"></script><script src="bananarama_files/libs/quarto-html/tippy.umd.min.js"></script><link href="bananarama_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="bananarama_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Randomness and seeds">
+<meta property="og:title" content="bananarama">
 <meta property="og:image" content="https://hadley.github.io/bananarama/logo.png">
 </head>
 <body>
@@ -38,9 +38,9 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../articles/bananarama.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../articles/bananarama.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
+<li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/randomness.html">Randomness and seeds</a></li>
@@ -61,12 +61,12 @@
 </nav><div class="container template-quarto">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Randomness and seeds</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>bananarama</h1>
 
 
 
 
-      <small class="dont-index">Source: <a href="https://github.com/hadley/bananarama/blob/main/vignettes/articles/randomness.qmd" class="external-link"><code>vignettes/articles/randomness.qmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/hadley/bananarama/blob/main/vignettes/bananarama.qmd" class="external-link"><code>vignettes/bananarama.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
     </div>
 
@@ -75,94 +75,31 @@
 
 
 
-    <p>Image generation is inherently stochastic: the same prompt can produce visibly different results each time. bananarama lets you control this with two YAML fields:</p>
+    <p>bananarama makes it easy to generate multiple consistent images for use in a slide deck. You create a YAML file like this:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">defaults</span><span class="kw">:</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">  style</span><span class="kw">: </span><span class="ch">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    Flat vector editorial illustration with a muted, desaturated</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    color palette. Mid-century modern aesthetic. Calm and approachable.</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">images</span><span class="kw">:</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> banana-1</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">description</span><span class="kw">:</span><span class="at"> One banana on a plate</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> banana-2</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">description</span><span class="kw">:</span><span class="at"> Two bananas on a plate</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> banana-fight</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">description</span><span class="kw">:</span><span class="at"> Two bananas fighting on a plate</span></span></code></pre></div>
+<p>Then call <code><a href="../reference/bananarama.html">bananarama::bananarama()</a></code> to generate the images.</p>
+<p>But how do you use bananarama effectively for presentation images? Here’s some advice that I have developed through trial and error:</p>
 <ul>
-<li>
-<strong><code>n</code></strong>: generate multiple images from the same prompt.</li>
-<li>
-<strong><code>seed</code></strong>: pin the random seed for more reproducible output.</li>
+<li><p>Use illustrations, not photos or diagrams. I think AI-generated photos are fundamentally creepy/misleading and best avoided. Diagrams, at least today, have a different problem. Current models tend to produce highly visually detailed results that can be overwhelming, and fail their key purpose: abstracting a complex process into something more immediately digestible. Illustrations are a sweet spot: they can be simple and stylized, which makes it easier for the model to produce good results.</p></li>
+<li><p>Spend some time coming up with a style that you like. <a href="styles.html">Styles</a> includes some examples to get your creative juices flowing, but I recommend experimenting with your own unique take. Look for styles that are simple and consistent, and that work well with the subject matter of your images.</p></li>
+<li><p>You can also use a reference image to anchor the style and figures, which is key if you want consistent characters across multiple images. bananarama makes this easy by automatically converting <code>[image.png]</code> into a reference image. I often make these reference images by cropping out parts of generated images that I particularly like.</p></li>
+<li><p>Roll with it. AI image generation is still pretty unpredictable, so you may need to generate a few rounds of images before you get something you like. Don’t hold too tightly to a preconceived notion of what you want the image to look like and instead embrace the happy accidents that come with the process.</p></li>
+<li><p>Support the arts! Image generation is built on the work that millions of artists have published to the internet. Give back to artists by buying art and visiting art museums.</p></li>
 </ul>
-<section class="level2"><h2 id="no-seed">No seed<a class="anchor" aria-label="anchor" href="#no-seed"></a>
-</h2>
-<p>Without a seed, each image is generated independently and you’ll see meaningful variation in composition, color, and detail.</p>
-<div class="quarto-layout-panel" data-layout-ncol="3">
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/no-seed-1.png"></p>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/no-seed-2.png"></p>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/no-seed-3.png"></p>
-</div>
-</div>
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/no-seed-4.png"></p>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/no-seed-5.png"></p>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/no-seed-6.png"></p>
-</div>
-</div>
-</div>
-</section><section class="level2"><h2 id="setting-a-seed">Setting a seed<a class="anchor" aria-label="anchor" href="#setting-a-seed"></a>
-</h2>
-<p>Setting a seed encourages the model to produce more consistent output. There’s much less variation between images compared to the unseeded set, event though results are not perfectly identical.</p>
-<div class="quarto-layout-panel" data-layout-ncol="3">
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/seed-a-1.png"></p>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/seed-a-2.png"></p>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/seed-a-3.png"></p>
-</div>
-</div>
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/seed-a-4.png"></p>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/seed-a-5.png"></p>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/seed-a-6.png"></p>
-</div>
-</div>
-</div>
-<p>A different seed value produces a different but again more consistent set of images. Comparing this set with seed A shows that the seed affects the specific output, not just the consistency.</p>
-<div class="quarto-layout-panel" data-layout-ncol="3">
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/seed-b-1.png"></p>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/seed-b-2.png"></p>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/seed-b-3.png"></p>
-</div>
-</div>
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/seed-b-4.png"></p>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/seed-b-5.png"></p>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
-<p><img src="randomness/seed-b-6.png"></p>
-</div>
-</div>
-</div>
-<p>Unfortunately there’s no way to determine what seed gemini uses if you don’t specify one, so you can’t reproduce unseeded results. If you want to be able to reproduce a specific image, you have to set a seed from the start.</p>
-</section><script id="quarto-html-after-body" type="application/javascript">
+<script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
@@ -245,8 +182,7 @@
       }
     }
   });
-  </script></main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
-    </nav></aside>
+  </script></main>
 </div>
 
 

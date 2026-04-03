@@ -38,6 +38,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/bananarama.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
@@ -66,7 +67,7 @@
 </h1>
 </div>
 <!-- badges: start -->
-<!-- badges: end -->
+
 <p>bananarama generates slide backgrounds with Google Gemini. Define your images in a YAML configuration file with support for reference images and style defaults, then generate images in parallel, making it fast to generate full deck of images.</p>
 <p>bananarama avoids the usual tedious loop of copying prompts into a web UI, downloading images, tweaking, and repeating. Now your process is (mostly) reproducible: your prompts live in version-controlled YAML, and regenerating every image is a single function call. No more copy-paste and no more losing track of which prompt produced which image.</p>
 <div class="section level2">
@@ -180,7 +181,13 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/hadley/bananarama/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/hadley/bananarama/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://app.codecov.io/gh/hadley/bananarama" class="external-link"><img src="https://codecov.io/gh/hadley/bananarama/graph/badge.svg" alt="Codecov test coverage"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>

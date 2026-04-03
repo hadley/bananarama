@@ -1,0 +1,60 @@
+# bananarama
+
+bananarama makes it easy to generate multiple consistent images for use
+in a slide deck. You create a YAML file like this:
+
+``` yaml
+defaults:
+  style: >
+    Flat vector editorial illustration with a muted, desaturated
+    color palette. Mid-century modern aesthetic. Calm and approachable.
+
+images:
+  - name: banana-1
+    description: One banana on a plate
+
+  - name: banana-2
+    description: Two bananas on a plate
+
+  - name: banana-fight
+    description: Two bananas fighting on a plate
+```
+
+Then call
+[`bananarama::bananarama()`](https://hadley.github.io/bananarama/reference/bananarama.md)
+to generate the images.
+
+But how do you use bananarama effectively for presentation images?
+Here’s some advice that I have developed through trial and error:
+
+- Use illustrations, not photos or diagrams. I think AI-generated photos
+  are fundamentally creepy/misleading and best avoided. Diagrams, at
+  least today, have a different problem. Current models tend to produce
+  highly visually detailed results that can be overwhelming, and fail
+  their key purpose: abstracting a complex process into something more
+  immediately digestible. Illustrations are a sweet spot: they can be
+  simple and stylized, which makes it easier for the model to produce
+  good results.
+
+- Spend some time coming up with a style that you like.
+  [Styles](https://hadley.github.io/bananarama/articles/styles.md)
+  includes some examples to get your creative juices flowing, but I
+  recommend experimenting with your own unique take. Look for styles
+  that are simple and consistent, and that work well with the subject
+  matter of your images.
+
+- You can also use a reference image to anchor the style and figures,
+  which is key if you want consistent characters across multiple images.
+  bananarama makes this easy by automatically converting `[image.png]`
+  into a reference image. I often make these reference images by
+  cropping out parts of generated images that I particularly like.
+
+- Roll with it. AI image generation is still pretty unpredictable, so
+  you may need to generate a few rounds of images before you get
+  something you like. Don’t hold too tightly to a preconceived notion of
+  what you want the image to look like and instead embrace the happy
+  accidents that come with the process.
+
+- Support the arts! Image generation is built on the work that millions
+  of artists have published to the internet. Give back to artists by
+  buying art and visiting art museums.
