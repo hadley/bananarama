@@ -18,3 +18,27 @@ images:
   - name: seed-b
     n: 6
     seed: 44455
+
+  - name: fruits-banana
+    description: A single ripe banana resting on a clean surface.
+    seed: 67633
+
+  - name: fruits-apple
+    description: A single ripe apple resting on a clean surface.
+    seed: 67633
+
+  - name: fruits-orange
+    description: A single ripe orange resting on a clean surface.
+    seed: 67633
+
+  - name: fruits-pear
+    description: A single ripe pear resting on a clean surface.
+    seed: 67633
+
+  - name: fruits-strawberry
+    description: A single ripe strawberry resting on a clean surface.
+    seed: 67633
+
+  - name: fruits-lemon
+    description: A single ripe lemon resting on a clean surface.
+    seed: 67633
