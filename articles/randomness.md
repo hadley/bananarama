@@ -62,3 +62,22 @@ Unfortunately there’s no way to determine what seed gemini uses if you
 don’t specify one, so you can’t reproduce unseeded results. If you want
 to be able to reproduce a specific image, you have to set a seed from
 the start.
+
+## Seeds across different prompts
+
+Note that a seed does not promote consistency across different prompts
+that share the same style. Here, six different fruits are each generated
+with the same seed and style, but each fruit looks producing a cohesive
+set despite the varying subjects:
+
+![](randomness/fruits-banana.png)
+
+![](randomness/fruits-apple.png)
+
+![](randomness/fruits-orange.png)
+
+![](randomness/fruits-pear.png)
+
+![](randomness/fruits-strawberry.png)
+
+![](randomness/fruits-lemon.png)
