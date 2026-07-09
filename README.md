@@ -45,7 +45,7 @@ bananarama::bananarama("path/to/bananarama.yaml")
 
 Images that already exist are skipped unless you pass `force = TRUE`.
 
-Bananrama currently uses nano banana2 (akaa `gemini-3.1-flash-image-preview`), which costs around $0.07 per image.
+Bananarama currently uses nano banana2 (aka `gemini-3.1-flash-image-preview`), which costs around $0.07 per image.
 
 ## YAML configuration
 
