@@ -1,11 +1,11 @@
-pandoc: 3.1.11
-pkgdown: 2.2.0
+pandoc: 3.8.3
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   bananarama: bananarama.html
   articles/randomness: randomness.html
   articles/styles: styles.html
-last_built: 2026-04-17T13:30Z
+last_built: 2026-07-09T19:08Z
 urls:
   reference: https://hadley.github.io/bananarama/reference
   article: https://hadley.github.io/bananarama/articles

@@ -16,6 +16,7 @@ and no more losing track of which prompt produced which image.
 You can install the development version of bananarama from GitHub:
 
 ``` r
+
 # install.packages("pak")
 pak::pak("hadley/bananarama")
 ```
@@ -44,12 +45,13 @@ Reference images like `[hadley]` are matched to image files
 Then generate the images with:
 
 ``` r
+
 bananarama::bananarama("path/to/bananarama.yaml")
 ```
 
 Images that already exist are skipped unless you pass `force = TRUE`.
 
-Bananrama currently uses nano banana2 (akaa
+Bananarama currently uses nano banana2 (aka
 `gemini-3.1-flash-image-preview`), which costs around \$0.07 per image.
 
 ## YAML configuration
