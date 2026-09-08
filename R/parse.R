@@ -1,3 +1,26 @@
+# Supported models and their providers. The provider is looked up from the
+# model name, so the YAML config never needs a separate provider field.
+model_registry <- list(
+  "gemini-3.1-flash-image-preview" = list(provider = "gemini"),
+  "gemini-3.1-flash-lite-image" = list(provider = "gemini"),
+  "gemini-3-pro-image" = list(provider = "gemini"),
+  "gpt-image-2.5-flare" = list(provider = "openai"),
+  "gpt-image-2.5-flare-2026-09-08" = list(provider = "openai"),
+  "gpt-image-2.5-sunburst" = list(provider = "openai"),
+  "gpt-image-2.5-sunburst-2026-09-08" = list(provider = "openai")
+)
+
+check_model <- function(value, name) {
+  entry <- model_registry[[value]]
+  if (is.null(entry)) {
+    cli::cli_abort(c(
+      "Image {.val {name}} has unsupported {.field model} {.val {value}}.",
+      i = "Must be one of {.or {.val {names(model_registry)}}}."
+    ))
+  }
+  entry$provider
+}
+
 resolve_config_path <- function(path) {
   path <- path.expand(path)
   if (dir.exists(path)) {
@@ -72,10 +95,21 @@ parse_image <- function(img, defaults) {
   force <- img$force %||% defaults$force %||% FALSE
   seed <- img$seed %||% defaults$seed
 
+  model <- img$model %||% defaults$model
+  provider <- check_model(model, img$name)
+  if (!is.null(seed) && provider == "openai") {
+    cli::cli_warn(c(
+      "Image {.val {img$name}} sets {.field seed}, which {.val {model}} does not support.",
+      i = "The seed will be ignored."
+    ))
+    seed <- NULL
+  }
+
   list(
     name = img$name,
     description = description,
-    model = img$model %||% defaults$model,
+    model = model,
+    provider = provider,
     style = img$style %||% defaults$style,
     `aspect-ratio` = aspect_ratio,
     resolution = resolution,

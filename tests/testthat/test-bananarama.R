@@ -72,7 +72,9 @@ test_that("model_prices covers known models", {
     model_prices,
     c(
       "gemini-3.1-flash-image-preview",
-      "gemini-3-pro-image-preview"
+      "gemini-3-pro-image",
+      "gpt-image-2.5-flare",
+      "gpt-image-2.5-sunburst"
     )
   )
   for (model in names(model_prices)) {
@@ -81,6 +83,49 @@ test_that("model_prices covers known models", {
     expect_true("text" %in% names(prices$input))
     expect_true("image" %in% names(prices$output))
   }
+})
+
+test_that("openai_size maps aspect ratio and resolution to pixels", {
+  expect_equal(openai_size("16:9", "1K"), "1536x864")
+  expect_equal(openai_size("1:1", "1K"), "1536x1536")
+  expect_equal(openai_size("3:2", "2K"), "2048x1360")
+  expect_equal(openai_size("9:16", "1K"), "864x1536")
+  # 4K is clamped to the API maximum of 3840x2160
+  expect_equal(openai_size("16:9", "4K"), "3840x2160")
+})
+
+test_that("openai_size dimensions are divisible by 16", {
+  ratios <- c(
+    "1:1",
+    "2:3",
+    "3:2",
+    "3:4",
+    "4:3",
+    "4:5",
+    "5:4",
+    "9:16",
+    "16:9",
+    "21:9"
+  )
+  for (ratio in ratios) {
+    dims <- as.integer(strsplit(openai_size(ratio, "2K"), "x")[[1]])
+    expect_true(all(dims %% 16 == 0), label = ratio)
+  }
+})
+
+test_that("make_chat_openai registers an image_generation tool", {
+  spec <- list(
+    model = "gpt-image-2.5-flare",
+    provider = "openai",
+    `aspect-ratio` = "16:9",
+    resolution = "1K"
+  )
+  chat <- make_chat_openai(spec)
+  tools <- chat$get_tools()
+  expect_length(tools, 1)
+  expect_equal(tools[[1]]@json$type, "image_generation")
+  expect_equal(tools[[1]]@json$model, "gpt-image-2.5-flare")
+  expect_equal(tools[[1]]@json$size, "1536x864")
 })
 
 test_that("compute_output_paths expands n into multiple output_paths", {

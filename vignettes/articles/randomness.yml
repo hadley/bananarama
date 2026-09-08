@@ -23,6 +23,10 @@ images:
     description: A single ripe banana resting on a clean surface.
     seed: 67633
 
+  - name: fruits-banana-flare
+    description: A single ripe banana resting on a clean surface.
+    model: gpt-image-2.5-flare
+
   - name: fruits-apple
     description: A single ripe apple resting on a clean surface.
     seed: 67633
