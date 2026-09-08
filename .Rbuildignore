@@ -10,4 +10,6 @@
 ^pkgdown$
 ^\.github$
 ^vignettes/articles$
+^vignettes/[.]quarto$
+^vignettes/bananarama_files$
 ^codecov\.yml$

@@ -10,6 +10,7 @@ unused <- function() {
 }
 
 ## usethis namespace: start
+#' @importFrom rlang %||%
 ## usethis namespace: end
 
 ## mockable bindings: start
