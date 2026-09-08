@@ -17,7 +17,7 @@ URL: https://github.com/hadley/bananarama,
 BugReports: https://github.com/hadley/bananarama/issues
 Imports:
     cli,
-    ellmer,
+    ellmer (>= 0.4.0),
     magick,
     openssl,
     rlang,
