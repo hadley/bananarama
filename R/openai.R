@@ -65,7 +65,7 @@ image_cost_openai <- function(chat, model) {
   cost <- as.numeric(chat$get_cost("last"))
 
   # Image-generation tokens are itemized in tool_usage, not usage
-  prices <- model_prices[[sub("-2026-09-08$", "", model)]]
+  prices <- openai_prices[[sub("-2026-09-08$", "", model)]]
   tool_usage <- chat$last_turn()@json$tool_usage$image_gen
   if (is.null(prices) || is.null(tool_usage)) {
     return(cost)

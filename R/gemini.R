@@ -36,7 +36,7 @@ image_cost_gemini <- function(chat, model) {
   turn <- chat$last_turn()
   usage <- turn@json$usageMetadata
 
-  prices <- model_prices[[model]]
+  prices <- gemini_prices[[model]]
   if (is.null(prices)) {
     return(0)
   }

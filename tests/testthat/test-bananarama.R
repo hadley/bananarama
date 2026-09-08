@@ -67,18 +67,16 @@ test_that("preprocess_image handles placeholders in style", {
   expect_length(result$ref_images, 2)
 })
 
-test_that("model_prices covers known models", {
+test_that("provider price tables cover known models", {
   expect_named(
-    model_prices,
-    c(
-      "gemini-3.1-flash-image-preview",
-      "gemini-3-pro-image",
-      "gpt-image-2.5-flare",
-      "gpt-image-2.5-sunburst"
-    )
+    gemini_prices,
+    c("gemini-3.1-flash-image-preview", "gemini-3-pro-image")
   )
-  for (model in names(model_prices)) {
-    prices <- model_prices[[model]]
+  expect_named(
+    openai_prices,
+    c("gpt-image-2.5-flare", "gpt-image-2.5-sunburst")
+  )
+  for (prices in c(gemini_prices, openai_prices)) {
     expect_named(prices, c("input", "output"))
     expect_true("text" %in% names(prices$input))
     expect_true("image" %in% names(prices$output))

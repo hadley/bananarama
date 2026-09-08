@@ -171,11 +171,6 @@ make_chat <- function(image_spec) {
   }
 }
 
-# Prices per million tokens, by model and modality; defined per provider in
-# gemini.R and openai.R. Models without known prices are omitted; their cost
-# is reported as 0.
-model_prices <- c(gemini_prices, openai_prices)
-
 image_cost <- function(chat, model) {
   if (identical(model_registry[[model]]$provider, "openai")) {
     image_cost_openai(chat, model)
