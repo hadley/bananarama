@@ -158,6 +158,11 @@ preprocess_image <- function(image, base_dir) {
   image
 }
 
+system_instruction <- paste(
+  "Draw a picture based on the user's description, carefully following their",
+  "specified style. Do not include text unless explicitly requested."
+)
+
 make_chat <- function(image_spec) {
   if (image_spec$provider == "openai") {
     return(make_chat_openai(image_spec))
@@ -174,8 +179,7 @@ make_chat <- function(image_spec) {
   }
 
   ellmer::chat_google_gemini(
-    "Draw a picture based on the user's description, carefully following their
-    specified style. Do not include text unless explicitly requested.",
+    system_instruction,
     model = image_spec$model,
     api_args = list(
       generationConfig = gen_config
@@ -208,11 +212,6 @@ model_prices <- list(
 
 # OpenAI (Responses API via ellmer) ---------------------------------------------
 
-openai_system_instruction <- paste(
-  "Draw a picture based on the user's description, carefully following their",
-  "specified style. Do not include text unless explicitly requested."
-)
-
 # The Responses API generates images via a built-in image_generation tool
 # hosted by a chat model; the gpt-image model is selected in the tool config.
 openai_chat_model <- "gpt-5"
@@ -230,7 +229,7 @@ make_chat_openai <- function(image_spec) {
   )
 
   chat <- ellmer::chat_openai(
-    openai_system_instruction,
+    system_instruction,
     model = openai_chat_model
   )
   chat$register_tool(image_tool)
