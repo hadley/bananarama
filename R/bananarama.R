@@ -165,151 +165,23 @@ system_instruction <- paste(
 
 make_chat <- function(image_spec) {
   if (image_spec$provider == "openai") {
-    return(make_chat_openai(image_spec))
-  }
-
-  image_config <- list(aspectRatio = image_spec$`aspect-ratio`)
-  if (image_spec$model == "gemini-3-pro-image") {
-    image_config$imageSize <- image_spec$resolution
-  }
-
-  gen_config <- list(imageConfig = image_config)
-  if (!is.null(image_spec$seed)) {
-    gen_config$seed <- as.integer(image_spec$seed)
-  }
-
-  ellmer::chat_google_gemini(
-    system_instruction,
-    model = image_spec$model,
-    api_args = list(
-      generationConfig = gen_config
-    )
-  )
-}
-
-# Prices per million tokens, by model and modality.
-# Update this list when new models or pricing tiers are released.
-# Models without known prices are omitted; their cost is reported as 0.
-model_prices <- list(
-  "gemini-3.1-flash-image-preview" = list(
-    input = list(text = 0.50, image = 0.50),
-    output = list(text = 3.00, image = 60.00)
-  ),
-  "gemini-3-pro-image" = list(
-    input = list(text = 1.25, image = 1.25),
-    output = list(text = 5.00, image = 60.00)
-  ),
-  # OpenAI gpt-image-2.5: no text output charge
-  "gpt-image-2.5-flare" = list(
-    input = list(text = 5.00, image = 8.00),
-    output = list(text = 0, image = 30.00)
-  ),
-  "gpt-image-2.5-sunburst" = list(
-    input = list(text = 5.00, image = 8.00),
-    output = list(text = 0, image = 30.00)
-  )
-)
-
-# OpenAI (Responses API via ellmer) ---------------------------------------------
-
-# The Responses API generates images via a built-in image_generation tool
-# hosted by a chat model; the gpt-image model is selected in the tool config.
-openai_chat_model <- "gpt-5"
-
-make_chat_openai <- function(image_spec) {
-  # ToolBuiltIn is not yet exported by ellmer
-  image_tool <- ellmer:::ToolBuiltIn(
-    name = "image_gen",
-    json = list(
-      type = "image_generation",
-      model = image_spec$model,
-      size = openai_size(image_spec$`aspect-ratio`, image_spec$resolution),
-      output_format = "png"
-    )
-  )
-
-  chat <- ellmer::chat_openai(
-    system_instruction,
-    model = openai_chat_model
-  )
-  chat$register_tool(image_tool)
-  chat
-}
-
-# Map aspect-ratio + resolution to a WIDTHxHEIGHT size. The OpenAI API
-# requires dimensions divisible by 16, a ratio between 1:3 and 3:1, and
-# at most 3840x2160.
-openai_size <- function(aspect_ratio, resolution) {
-  parts <- as.integer(strsplit(aspect_ratio, ":", fixed = TRUE)[[1]])
-  ratio <- parts[1] / parts[2]
-
-  long_side <- c("1K" = 1536, "2K" = 2048, "4K" = 4096)[[resolution]]
-  if (ratio >= 1) {
-    width <- long_side
-    height <- long_side / ratio
+    make_chat_openai(image_spec)
   } else {
-    height <- long_side
-    width <- long_side * ratio
+    make_chat_gemini(image_spec)
   }
-
-  # Clamp to the API maximum of 3840x2160
-  scale <- min(1, 3840 / width, 2160 / height)
-  width <- floor(width * scale / 16) * 16
-  height <- floor(height * scale / 16) * 16
-
-  paste0(width, "x", height)
 }
 
-# End OpenAI -------------------------------------------------------------------
+# Prices per million tokens, by model and modality; defined per provider in
+# gemini.R and openai.R. Models without known prices are omitted; their cost
+# is reported as 0.
+model_prices <- c(gemini_prices, openai_prices)
 
 image_cost <- function(chat, model) {
   if (identical(model_registry[[model]]$provider, "openai")) {
-    return(image_cost_openai(chat, model))
+    image_cost_openai(chat, model)
+  } else {
+    image_cost_gemini(chat, model)
   }
-
-  turn <- chat$last_turn()
-  usage <- turn@json$usageMetadata
-
-  prices <- model_prices[[model]]
-  if (is.null(prices)) {
-    return(0)
-  }
-
-  input_cost <- 0
-  for (detail in usage$promptTokensDetails) {
-    modality <- tolower(detail$modality)
-    price <- prices$input[[modality]] %||% prices$input$text
-    input_cost <- input_cost + detail$tokenCount * price / 1e6
-  }
-
-  output_cost <- 0
-  for (detail in usage$candidatesTokensDetails) {
-    modality <- tolower(detail$modality)
-    price <- prices$output[[modality]] %||% prices$output$text
-    output_cost <- output_cost + detail$tokenCount * price / 1e6
-  }
-
-  input_cost + output_cost
-}
-
-image_cost_openai <- function(chat, model) {
-  # Chat-model (gpt-5) tokens, priced by ellmer
-  cost <- as.numeric(chat$get_cost("last"))
-
-  # Image-generation tokens are itemized in tool_usage, not usage
-  prices <- model_prices[[sub("-2026-09-08$", "", model)]]
-  tool_usage <- chat$last_turn()@json$tool_usage$image_gen
-  if (is.null(prices) || is.null(tool_usage)) {
-    return(cost)
-  }
-
-  in_d <- tool_usage$input_tokens_details
-  out_d <- tool_usage$output_tokens_details
-  cost +
-    (in_d$text_tokens %||% 0) * prices$input$text / 1e6 +
-    (in_d$image_tokens %||% 0) * prices$input$image / 1e6 +
-    (out_d$text_tokens %||% 0) * prices$output$text / 1e6 +
-    (out_d$image_tokens %||% 0) * prices$output$image / 1e6
 }
 
 get_reference_image <- function(path) {
