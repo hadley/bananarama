@@ -10,13 +10,16 @@ knitr::opts_chunk$set(
 )
 ```
 
-Sometimes you don't want a set of independent images — you want a series of images that build on one another, like the panels of a story. bananarama supports this with `sequence`: each step generates a new image by editing the previous step's output, and every intermediate is saved as a file you can use.
+Sometimes you don't want a set of independent images — you want a series of images that build on one another, like the panels of a story. bananarama supports this with `sequence`: each step generates a new image by editing the previous step's output, and every intermediate is saved as a file you can use. This will generally lead to greater consistency between images, but AI image gen is still very far from perfect at this.
 
 ## Chains
 
 An image can have a `sequence` of steps instead of a single `description`. The top-level `sequence` is a chain: each step edits the previous step's output, and every intermediate is saved as a file:
 
 ```yaml
+defaults:
+  model: gpt-image-2.5-flare
+
 images:
   - name: robot-factory
     sequence:
@@ -30,9 +33,11 @@ images:
 
 This generates `robot-factory-base.png`, `robot-factory-hadley.png`, and `robot-factory-night.png`, each building on the previous file.
 
+Note that I recommend using a gpt image model rather than a gemini model; they seem better at maintaining consistency (when I wrote this, Sept 2026).
+
 ## Branching
 
-A step may itself contain a `sequence`, which branches off that step's image — every child builds on the same parent image, not on each other. A step with both a `description` and a `sequence` produces its own image *and* serves as the starting point for its children; a step with only a `sequence` is a pure branch point:
+A step may itself contain `images`: independent continuations that each build on the step's image, not on each other. (Just like the top-level `images` field, siblings are independent — the only difference is that nested images start from the parent's image instead of from scratch.) A step with both a `description` and `images` produces its own image *and* serves as the starting point for its children; a step with only `images` is a pure branch point:
 
 ```yaml
 images:
@@ -42,32 +47,25 @@ images:
         description: Draw a factory full of robots typing at computers.
       - name: day
         description: Make it a bright sunny day.
-        sequence:
+        images:
           - name: hadley
             description: Add [hadley] on the catwalk.
       - name: night
         description: Make it night time.
-        sequence:
+        images:
           - name: hadley
             description: Add [hadley] on the catwalk, screens glowing.
 ```
 
 This produces `robot-factory-base.png`, `robot-factory-day.png`, `robot-factory-day-hadley.png`, `robot-factory-night.png`, and `robot-factory-night-hadley.png`, generating `base` only once.
 
-## Rules
+`sequence` and `images` can be nested arbitrarily: a `sequence` inside `images` gives a chain within a branch, and `images` inside a `sequence` step gives branches off that step.
 
-- Each step must have a `name`, unique among its siblings.
-- Steps support `description`, `style`, `aspect-ratio`, `model`, and `seed` overrides. `resolution` and `n` can only be set at the top level of the image.
-- With `n > 1`, each step generates `n` variants, and variant `i` of a step builds on variant `i` of its parent step.
-- Generation is scheduled by dependency: a step runs as soon as its parent's file exists (cached or freshly generated), and everything that's ready runs in parallel.
-
-## Caching
-
-Every step is cached independently, so you can iterate on later steps without paying to regenerate earlier ones. Delete a step's file and re-run, and only that step (and anything building on it) is regenerated — the rest of the files are reused as-is.
+Every step is cached independently, so you can iterate on later steps without paying to regenerate earlier ones. Delete a step's file and re-run, and only that step is regenerated — the rest of the files are reused as-is.
 
 ## Example: telling a story
 
-This example tells a short story across a sequence of images. It uses a reference image (`robot.png`) so the main character looks the same in every panel, plus a fixed `style` and `seed` in `defaults` to keep the look consistent:
+This example tells a short story across a sequence of images. Because it uses a sequence we don't need to anchor with a reference image to make the main character looks the same in every panel. (But if we were to regenerate all the images, we'd get a different robot.)
 
 ```{verbatim, file="story.yml", lang="yaml"}
 ```
@@ -95,7 +93,7 @@ Then robot finds a flower.
 
 ![](story/robot-story-flower.png)
 
-The `flower` step has both a `description` and a nested `sequence`, so its image is saved *and* two images branch off from it:
+The `flower` step has nested `images` so two alternatives branch off from it:
 
 ::: {layout-ncol=2}
 ![](story/robot-story-flower-careful.png)

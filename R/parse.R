@@ -83,30 +83,27 @@ parse_image <- function(img, defaults) {
   force <- img$force %||% defaults$force %||% FALSE
   spec <- resolve_spec(img, defaults, img$name)
 
-  if (!is.null(img$sequence)) {
-    steps <- parse_steps(img$sequence, spec, path = img$name)
-    return(list(
-      name = img$name,
-      sequence = steps,
-      resolution = spec$resolution,
-      n = n,
-      force = force
-    ))
-  }
-
   description <- img$description %||% defaults$description
-  if (is.null(description)) {
+  if (is.null(description) && is.null(img$sequence) && is.null(img$images)) {
     cli::cli_abort(
       "Image {.val {img$name}} must have a {.field description} field."
     )
   }
 
   c(
-    list(name = img$name, description = description),
+    list(name = img$name, full_name = img$name, description = description),
     spec,
     list(
       n = n,
-      force = force
+      force = force,
+      # A sequence chains: each step builds on the previous sibling.
+      sequence = if (!is.null(img$sequence)) {
+        parse_steps(img$sequence, spec, path = img$name)
+      },
+      # Nested images branch: each builds on this image, not on each other.
+      images = if (!is.null(img$images)) {
+        parse_steps(img$images, spec, path = img$name)
+      }
     )
   )
 }
@@ -166,9 +163,11 @@ parse_steps <- function(steps, inherited, path) {
 parse_step <- function(step, inherited, path) {
   full_name <- paste(path, step$name, sep = "-")
 
-  if (is.null(step$description) && is.null(step$sequence)) {
+  if (
+    is.null(step$description) && is.null(step$sequence) && is.null(step$images)
+  ) {
     cli::cli_abort(
-      "Step {.val {full_name}} must have a {.field description} and/or a {.field sequence}."
+      "Step {.val {full_name}} must have a {.field description}, a {.field sequence}, and/or {.field images}."
     )
   }
   if (!is.null(step$resolution)) {
@@ -185,9 +184,6 @@ parse_step <- function(step, inherited, path) {
   }
 
   spec <- resolve_spec(step, inherited, full_name)
-  children <- if (!is.null(step$sequence)) {
-    parse_steps(step$sequence, spec, path = full_name)
-  }
 
   c(
     list(
@@ -196,7 +192,14 @@ parse_step <- function(step, inherited, path) {
       description = step$description
     ),
     spec,
-    list(sequence = children)
+    list(
+      sequence = if (!is.null(step$sequence)) {
+        parse_steps(step$sequence, spec, path = full_name)
+      },
+      images = if (!is.null(step$images)) {
+        parse_steps(step$images, spec, path = full_name)
+      }
+    )
   )
 }
 

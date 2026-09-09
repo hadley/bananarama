@@ -211,10 +211,51 @@ test_that("parse_image parses nested sequences with cascading overrides", {
   expect_equal(night$sequence[[1]]$full_name, "seq-base-night-stars")
 })
 
-test_that("parse_image errors on sequence step without description or sequence", {
+test_that("parse_image parses nested images and sequence on the same step", {
+  defaults <- parse_defaults(NULL)
+  img <- list(
+    name = "seq",
+    sequence = list(
+      list(
+        name = "base",
+        description = "A scene",
+        images = list(
+          list(name = "day", description = "Make it day"),
+          list(name = "night", description = "Make it night")
+        ),
+        sequence = list(
+          list(name = "zoom", description = "Zoom in")
+        )
+      )
+    )
+  )
+
+  result <- parse_image(img, defaults)
+  base <- result$sequence[[1]]
+
+  expect_length(base$images, 2)
+  expect_equal(base$images[[1]]$full_name, "seq-base-day")
+  expect_length(base$sequence, 1)
+  expect_equal(base$sequence[[1]]$full_name, "seq-base-zoom")
+})
+
+test_that("parse_image accepts a top-level image with description and images", {
+  defaults <- parse_defaults(NULL)
+  img <- list(
+    name = "img",
+    description = "A scene",
+    images = list(list(name = "alt", description = "A variation"))
+  )
+
+  result <- parse_image(img, defaults)
+  expect_equal(result$description, "A scene")
+  expect_equal(result$images[[1]]$full_name, "img-alt")
+})
+
+test_that("parse_image errors on step without description, sequence, or images", {
   defaults <- parse_defaults(NULL)
   img <- list(name = "seq", sequence = list(list(name = "base")))
-  expect_error(parse_image(img, defaults), "description.*sequence")
+  expect_error(parse_image(img, defaults), "description.*sequence.*images")
 })
 
 test_that("parse_image errors on duplicate sibling step names", {

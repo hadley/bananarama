@@ -130,8 +130,8 @@ run_wave <- function(wave, base_dir) {
 build_tasks <- function(images, output_dir, force = FALSE) {
   all <- list()
   for (image in images) {
-    if (!is.null(image$sequence)) {
-      all <- c(all, sequence_tasks(image, output_dir))
+    if (!is.null(image$sequence) || !is.null(image$images)) {
+      all <- c(all, tree_tasks(image, output_dir))
     } else {
       n <- image$n %||% 1L
       nms <- if (n > 1L) paste0(image$name, "-", seq_len(n)) else image$name
@@ -160,13 +160,13 @@ build_tasks <- function(images, output_dir, force = FALSE) {
   list(pending = all[!skip], paths = paths)
 }
 
-# Walk a sequence tree, emitting one task per step (with a description) per
-# iteration. The image's top-level sequence is a chain: each step builds on
-# the previous step's output. A step's nested sequence is a set of branches:
-# every child builds on the step's own output. parent_paths tracks the files
-# to build on, one per iteration, so iteration i always builds on iteration i
-# of the parent.
-sequence_tasks <- function(image, output_dir) {
+# Walk a sequence/images tree, emitting one task per step (with a
+# description) per iteration. A `sequence` chains: the first step builds on
+# the current image and each subsequent step builds on the previous sibling.
+# Nested `images` branch: every child builds on the current image, not on
+# each other. parent_paths tracks the files to build on, one per iteration,
+# so iteration i always builds on iteration i of the parent.
+tree_tasks <- function(image, output_dir) {
   tasks <- list()
   n <- image$n %||% 1L
 
@@ -183,6 +183,7 @@ sequence_tasks <- function(image, output_dir) {
 
       spec <- step
       spec$sequence <- NULL
+      spec$images <- NULL
       spec$resolution <- image$resolution
       tasks[[length(tasks) + 1L]] <<- list(
         image = spec,
@@ -194,24 +195,31 @@ sequence_tasks <- function(image, output_dir) {
     paths
   }
 
-  # Nested sequences branch: every child builds on the same parent paths.
-  walk_branches <- function(steps, parent_paths) {
+  # With chain = TRUE (sequence), each step builds on the previous sibling;
+  # otherwise (images), every step builds on the same parent paths.
+  walk <- function(steps, parent_paths, chain) {
     for (step in steps) {
       paths <- emit(step, parent_paths)
       if (!is.null(step$sequence)) {
-        walk_branches(step$sequence, paths)
+        walk(step$sequence, paths, chain = TRUE)
+      }
+      if (!is.null(step$images)) {
+        walk(step$images, paths, chain = FALSE)
+      }
+      if (chain) {
+        parent_paths <- paths
       }
     }
   }
 
-  # The top-level sequence chains: each step builds on the previous step.
-  parent_paths <- NULL
-  for (step in image$sequence) {
-    paths <- emit(step, parent_paths)
-    if (!is.null(step$sequence)) {
-      walk_branches(step$sequence, paths)
-    }
-    parent_paths <- paths
+  # A top-level image with a description generates its own file first, and
+  # its children build on it.
+  parent_paths <- emit(image, NULL)
+  if (!is.null(image$sequence)) {
+    walk(image$sequence, parent_paths, chain = TRUE)
+  }
+  if (!is.null(image$images)) {
+    walk(image$images, parent_paths, chain = FALSE)
   }
   tasks
 }

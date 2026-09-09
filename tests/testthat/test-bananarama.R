@@ -41,7 +41,7 @@ test_that("build_tasks skips existing files unless forced", {
   expect_length(result$pending, 2)
 })
 
-test_that("sequence_tasks creates one task per step with parent wiring", {
+test_that("tree_tasks creates one task per step with parent wiring", {
   output_dir <- withr::local_tempdir()
 
   image <- list(
@@ -53,23 +53,21 @@ test_that("sequence_tasks creates one task per step with parent wiring", {
         name = "base",
         full_name = "seq-base",
         description = "A scene",
-        sequence = list(
+        images = list(
           list(
             name = "day",
             full_name = "seq-base-day",
-            description = "Make it day",
-            sequence = NULL
+            description = "Make it day"
           ),
           list(
             name = "night",
             full_name = "seq-base-night",
             description = NULL,
-            sequence = list(
+            images = list(
               list(
                 name = "stars",
                 full_name = "seq-base-night-stars",
-                description = "Add stars",
-                sequence = NULL
+                description = "Add stars"
               )
             )
           )
@@ -78,7 +76,7 @@ test_that("sequence_tasks creates one task per step with parent wiring", {
     )
   )
 
-  tasks <- sequence_tasks(image, output_dir)
+  tasks <- tree_tasks(image, output_dir)
 
   expect_equal(
     vapply(tasks, `[[`, character(1), "output_path"),
@@ -94,7 +92,7 @@ test_that("sequence_tasks creates one task per step with parent wiring", {
   expect_equal(tasks[[3]]$parent_path, tasks[[1]]$output_path)
 })
 
-test_that("nested sequences branch in parallel off their step", {
+test_that("nested images branch in parallel off their step", {
   output_dir <- withr::local_tempdir()
 
   image <- list(
@@ -106,32 +104,91 @@ test_that("nested sequences branch in parallel off their step", {
         name = "a",
         full_name = "seq-a",
         description = "a",
-        sequence = list(
+        images = list(
           list(
             name = "b",
             full_name = "seq-a-b",
-            description = "b",
-            sequence = NULL
+            description = "b"
           ),
           list(
             name = "c",
             full_name = "seq-a-c",
-            description = "c",
-            sequence = NULL
+            description = "c"
           )
         )
       )
     )
   )
 
-  tasks <- sequence_tasks(image, output_dir)
+  tasks <- tree_tasks(image, output_dir)
 
   # Both branches build on a, not on each other
   expect_equal(tasks[[2]]$parent_path, tasks[[1]]$output_path)
   expect_equal(tasks[[3]]$parent_path, tasks[[1]]$output_path)
 })
 
-test_that("sequence_tasks chains siblings sequentially", {
+test_that("a sequence inside images chains off the branch", {
+  output_dir <- withr::local_tempdir()
+
+  image <- list(
+    name = "seq",
+    n = 1L,
+    resolution = "1K",
+    sequence = list(
+      list(
+        name = "a",
+        full_name = "seq-a",
+        description = "a",
+        images = list(
+          list(
+            name = "b",
+            full_name = "seq-a-b",
+            description = "b",
+            sequence = list(
+              list(
+                name = "c",
+                full_name = "seq-a-b-c",
+                description = "c"
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+
+  tasks <- tree_tasks(image, output_dir)
+
+  # b branches off a; c chains off b
+  expect_equal(tasks[[2]]$parent_path, tasks[[1]]$output_path)
+  expect_equal(tasks[[3]]$parent_path, tasks[[2]]$output_path)
+})
+
+test_that("a top-level image with a description generates its own file", {
+  output_dir <- withr::local_tempdir()
+
+  image <- list(
+    name = "seq",
+    full_name = "seq",
+    n = 1L,
+    resolution = "1K",
+    description = "A scene",
+    images = list(
+      list(name = "b", full_name = "seq-b", description = "b")
+    )
+  )
+
+  tasks <- tree_tasks(image, output_dir)
+
+  expect_equal(
+    vapply(tasks, `[[`, character(1), "output_path"),
+    file.path(output_dir, c("seq.png", "seq-b.png"))
+  )
+  expect_null(tasks[[1]]$parent_path)
+  expect_equal(tasks[[2]]$parent_path, tasks[[1]]$output_path)
+})
+
+test_that("tree_tasks chains siblings sequentially", {
   output_dir <- withr::local_tempdir()
 
   image <- list(
@@ -145,14 +202,14 @@ test_that("sequence_tasks chains siblings sequentially", {
     )
   )
 
-  tasks <- sequence_tasks(image, output_dir)
+  tasks <- tree_tasks(image, output_dir)
 
   expect_null(tasks[[1]]$parent_path)
   expect_equal(tasks[[2]]$parent_path, tasks[[1]]$output_path)
   expect_equal(tasks[[3]]$parent_path, tasks[[2]]$output_path)
 })
 
-test_that("sequence_tasks expands n into parallel iterations", {
+test_that("tree_tasks expands n into parallel iterations", {
   output_dir <- withr::local_tempdir()
 
   image <- list(
@@ -176,7 +233,7 @@ test_that("sequence_tasks expands n into parallel iterations", {
     )
   )
 
-  tasks <- sequence_tasks(image, output_dir)
+  tasks <- tree_tasks(image, output_dir)
 
   expect_equal(
     vapply(tasks, `[[`, character(1), "output_path"),
