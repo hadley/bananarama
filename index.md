@@ -66,12 +66,32 @@ Bananarama currently uses nano banana2 (aka
   `"16:9"`.
 - **`resolution`**: One of `"1K"`, `"2K"`, `"4K"`. Default: `"1K"`.
 - **`n`**: Number of variants to generate per image. Default: `1`.
-- **`model`**: Gemini model to use. Default:
+- **`model`**: Image model to use (see below). Default:
   `"gemini-3.1-flash-image-preview"` (aka nano banana2).
 - **`force`**: If `true`, regenerate images even if they already exist.
   Default: `false`.
 - **`seed`**: Integer seed for the random number generator. Makes output
-  more (but not perfectly) deterministic.
+  more (but not perfectly) deterministic. Gemini models only; ignored
+  (with a warning) for OpenAI models.
+
+### Supported models
+
+The provider is inferred from the model name. Supported models:
+
+- **Gemini**
+  - `gemini-3.1-flash-image-preview` (default)
+  - `gemini-3.1-flash-lite-image`
+  - `gemini-3-pro-image`
+- **OpenAI**
+  - `gpt-image-2.5-flare` (fast)
+  - `gpt-image-2.5-sunburst` (higher quality)
+
+OpenAI models require the `OPENAI_API_KEY` environment variable. Images
+are generated via the Responses API, so reference images (`[name]`
+placeholders) work with both providers. One limitation compared to
+Gemini: `seed` is not supported.
+
+OpenAI models are much slower than gemini models.
 
 ### `output-dir`
 

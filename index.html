@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Generate Presentation Images Using Google Gemini • bananarama</title>
+<title>Generate Presentation Images Using Google Gemini or OpenAI • bananarama</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -16,9 +16,9 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
-<meta property="og:title" content="Generate Presentation Images Using Google Gemini">
-<meta name="description" content="Reproducibly generate slide images using Google Gemini. Define your images in a YAML configuration file with support for reference images and style defaults, eliminating the need to copy and paste prompts back and forth from a web UI. Images are generated in parallel for speed.">
-<meta property="og:description" content="Reproducibly generate slide images using Google Gemini. Define your images in a YAML configuration file with support for reference images and style defaults, eliminating the need to copy and paste prompts back and forth from a web UI. Images are generated in parallel for speed.">
+<meta property="og:title" content="Generate Presentation Images Using Google Gemini or OpenAI">
+<meta name="description" content="Reproducibly generate slide images using Google Gemini or OpenAI image models. Define your images in a YAML configuration file with support for reference images and style defaults, eliminating the need to copy and paste prompts back and forth from a web UI. Images are generated in parallel for speed.">
+<meta property="og:description" content="Reproducibly generate slide images using Google Gemini or OpenAI image models. Define your images in a YAML configuration file with support for reference images and style defaults, eliminating the need to copy and paste prompts back and forth from a web UI. Images are generated in parallel for speed.">
 <meta property="og:image" content="https://hadley.github.io/bananarama/logo.png">
 </head>
 <body>
@@ -118,12 +118,39 @@
 <li>
 <strong><code>n</code></strong>: Number of variants to generate per image. Default: <code>1</code>.</li>
 <li>
-<strong><code>model</code></strong>: Gemini model to use. Default: <code>"gemini-3.1-flash-image-preview"</code> (aka nano banana2).</li>
+<strong><code>model</code></strong>: Image model to use (see below). Default: <code>"gemini-3.1-flash-image-preview"</code> (aka nano banana2).</li>
 <li>
 <strong><code>force</code></strong>: If <code>true</code>, regenerate images even if they already exist. Default: <code>false</code>.</li>
 <li>
-<strong><code>seed</code></strong>: Integer seed for the random number generator. Makes output more (but not perfectly) deterministic.</li>
+<strong><code>seed</code></strong>: Integer seed for the random number generator. Makes output more (but not perfectly) deterministic. Gemini models only; ignored (with a warning) for OpenAI models.</li>
 </ul>
+</div>
+<div class="section level3">
+<h3 id="supported-models">Supported models<a class="anchor" aria-label="anchor" href="#supported-models"></a>
+</h3>
+<p>The provider is inferred from the model name. Supported models:</p>
+<ul>
+<li>
+<strong>Gemini</strong>
+<ul>
+<li>
+<code>gemini-3.1-flash-image-preview</code> (default)</li>
+<li><code>gemini-3.1-flash-lite-image</code></li>
+<li><code>gemini-3-pro-image</code></li>
+</ul>
+</li>
+<li>
+<strong>OpenAI</strong>
+<ul>
+<li>
+<code>gpt-image-2.5-flare</code> (fast)</li>
+<li>
+<code>gpt-image-2.5-sunburst</code> (higher quality)</li>
+</ul>
+</li>
+</ul>
+<p>OpenAI models require the <code>OPENAI_API_KEY</code> environment variable. Images are generated via the Responses API, so reference images (<code>[name]</code> placeholders) work with both providers. One limitation compared to Gemini: <code>seed</code> is not supported.</p>
+<p>OpenAI models are much slower than gemini models.</p>
 </div>
 <div class="section level3">
 <h3 id="output-dir">
