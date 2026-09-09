@@ -1,0 +1,34 @@
+defaults:
+  style: >
+    Chunky gouache illustration with opaque matte colors, visible brushwork,
+    bold simplified shapes, and a mid-century children's book feel
+  model: gpt-image-2.5-flare
+
+output-dir: story
+
+images:
+  - name: robot-story
+    sequence:
+      - name: meadow
+        description: >
+          A quiet meadow with rolling green hills and a single winding
+          dirt path under a blue sky.
+      - name: robot
+        description: >
+          Add a small curious robot, standing on the path and
+          looking around at the hills.
+      - name: zoom
+        description: >
+          Zoom in on the robot so it fills up the frame
+      - name: flower
+        description: >
+          The robot discovers a single bright red flower growing beside the
+          path and bends down to look at it.
+        sequence:
+          - name: careful
+            description: >
+              The robot carefully picks the flower and holds it up towards
+              the sun.
+          - name: stomp
+            description: >
+              The robot stomps on the flower

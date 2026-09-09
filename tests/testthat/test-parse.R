@@ -147,6 +147,109 @@ test_that("parse_image errors on invalid resolution", {
   expect_snapshot(parse_image(img, defaults), error = TRUE)
 })
 
+test_that("parse_image parses a simple sequence", {
+  defaults <- parse_defaults(NULL)
+  img <- list(
+    name = "seq",
+    sequence = list(
+      list(name = "base", description = "A scene"),
+      list(
+        name = "night",
+        description = "Make it night",
+        `aspect-ratio` = "3:2"
+      )
+    )
+  )
+
+  result <- parse_image(img, defaults)
+
+  expect_null(result$description)
+  expect_equal(result$n, 1L)
+  expect_length(result$sequence, 2)
+
+  step1 <- result$sequence[[1]]
+  expect_equal(step1$full_name, "seq-base")
+  expect_equal(step1$description, "A scene")
+  expect_equal(step1$`aspect-ratio`, "16:9")
+  expect_null(step1$sequence)
+
+  step2 <- result$sequence[[2]]
+  expect_equal(step2$full_name, "seq-night")
+  expect_equal(step2$`aspect-ratio`, "3:2")
+})
+
+test_that("parse_image parses nested sequences with cascading overrides", {
+  defaults <- parse_defaults(list(style = "gouache"))
+  img <- list(
+    name = "seq",
+    sequence = list(
+      list(
+        name = "base",
+        description = "A scene",
+        sequence = list(
+          list(name = "day", description = "Make it day"),
+          list(
+            name = "night",
+            sequence = list(
+              list(name = "stars", description = "Add stars")
+            )
+          )
+        )
+      )
+    )
+  )
+
+  result <- parse_image(img, defaults)
+  base <- result$sequence[[1]]
+
+  expect_equal(base$style, "gouache")
+  expect_length(base$sequence, 2)
+
+  night <- base$sequence[[2]]
+  expect_null(night$description)
+  expect_equal(night$full_name, "seq-base-night")
+  expect_equal(night$sequence[[1]]$full_name, "seq-base-night-stars")
+})
+
+test_that("parse_image errors on sequence step without description or sequence", {
+  defaults <- parse_defaults(NULL)
+  img <- list(name = "seq", sequence = list(list(name = "base")))
+  expect_error(parse_image(img, defaults), "description.*sequence")
+})
+
+test_that("parse_image errors on duplicate sibling step names", {
+  defaults <- parse_defaults(NULL)
+  img <- list(
+    name = "seq",
+    sequence = list(
+      list(name = "base", description = "a"),
+      list(name = "base", description = "b")
+    )
+  )
+  expect_error(parse_image(img, defaults), "duplicate")
+})
+
+test_that("parse_image errors on per-step resolution and n", {
+  defaults <- parse_defaults(NULL)
+  img <- list(
+    name = "seq",
+    sequence = list(list(name = "base", description = "a", resolution = "2K"))
+  )
+  expect_error(parse_image(img, defaults), "resolution")
+
+  img <- list(
+    name = "seq",
+    sequence = list(list(name = "base", description = "a", n = 2))
+  )
+  expect_error(parse_image(img, defaults), "n")
+})
+
+test_that("parse_image errors on unnamed sequence steps", {
+  defaults <- parse_defaults(NULL)
+  img <- list(name = "seq", sequence = list(list(description = "a")))
+  expect_error(parse_image(img, defaults), "name")
+})
+
 test_that("resolve_placeholders returns unchanged text without placeholders", {
   result <- resolve_placeholders("A simple description", tempdir())
   expect_equal(result$text, "A simple description")

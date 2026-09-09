@@ -74,18 +74,6 @@ parse_image <- function(img, defaults) {
   if (is.null(img$name)) {
     cli::cli_abort("Each image must have a {.field name} field.")
   }
-  description <- img$description %||% defaults$description
-  if (is.null(description)) {
-    cli::cli_abort(
-      "Image {.val {img$name}} must have a {.field description} field."
-    )
-  }
-
-  aspect_ratio <- img$`aspect-ratio` %||% defaults$`aspect-ratio`
-  check_aspect_ratio(aspect_ratio, img$name)
-
-  resolution <- img$resolution %||% defaults$resolution
-  check_resolution(resolution, img$name)
 
   n <- as.integer(img[["n"]] %||% defaults$n %||% 1L)
   if (n < 1L) {
@@ -93,29 +81,122 @@ parse_image <- function(img, defaults) {
   }
 
   force <- img$force %||% defaults$force %||% FALSE
-  seed <- img$seed %||% defaults$seed
+  spec <- resolve_spec(img, defaults, img$name)
 
-  model <- img$model %||% defaults$model
-  provider <- check_model(model, img$name)
+  if (!is.null(img$sequence)) {
+    steps <- parse_steps(img$sequence, spec, path = img$name)
+    return(list(
+      name = img$name,
+      sequence = steps,
+      resolution = spec$resolution,
+      n = n,
+      force = force
+    ))
+  }
+
+  description <- img$description %||% defaults$description
+  if (is.null(description)) {
+    cli::cli_abort(
+      "Image {.val {img$name}} must have a {.field description} field."
+    )
+  }
+
+  c(
+    list(name = img$name, description = description),
+    spec,
+    list(
+      n = n,
+      force = force
+    )
+  )
+}
+
+# Resolve the overridable fields (model, style, aspect-ratio, resolution,
+# seed) for an image or sequence step against its inherited values.
+resolve_spec <- function(values, defaults, name) {
+  aspect_ratio <- values$`aspect-ratio` %||% defaults$`aspect-ratio`
+  check_aspect_ratio(aspect_ratio, name)
+
+  resolution <- values$resolution %||% defaults$resolution
+  check_resolution(resolution, name)
+
+  model <- values$model %||% defaults$model
+  provider <- check_model(model, name)
+
+  seed <- values$seed %||% defaults$seed
   if (!is.null(seed) && provider == "openai") {
     cli::cli_warn(c(
-      "Image {.val {img$name}} sets {.field seed}, which {.val {model}} does not support.",
+      "Image {.val {name}} sets {.field seed}, which {.val {model}} does not support.",
       i = "The seed will be ignored."
     ))
     seed <- NULL
   }
 
   list(
-    name = img$name,
-    description = description,
     model = model,
     provider = provider,
-    style = img$style %||% defaults$style,
+    style = values$style %||% defaults$style,
     `aspect-ratio` = aspect_ratio,
     resolution = resolution,
-    n = n,
-    force = force,
     seed = seed
+  )
+}
+
+parse_steps <- function(steps, inherited, path) {
+  nms <- vapply(
+    steps,
+    function(step) step$name %||% NA_character_,
+    character(1)
+  )
+  if (anyNA(nms)) {
+    cli::cli_abort(
+      "Each step in sequence {.val {path}} must have a {.field name} field."
+    )
+  }
+  if (anyDuplicated(nms)) {
+    dup <- unique(nms[duplicated(nms)])
+    cli::cli_abort(
+      "Sequence {.val {path}} has duplicate step name{?s} {.val {dup}}."
+    )
+  }
+
+  lapply(steps, parse_step, inherited = inherited, path = path)
+}
+
+parse_step <- function(step, inherited, path) {
+  full_name <- paste(path, step$name, sep = "-")
+
+  if (is.null(step$description) && is.null(step$sequence)) {
+    cli::cli_abort(
+      "Step {.val {full_name}} must have a {.field description} and/or a {.field sequence}."
+    )
+  }
+  if (!is.null(step$resolution)) {
+    cli::cli_abort(c(
+      "Step {.val {full_name}} sets {.field resolution}.",
+      i = "{.field resolution} can only be set at the top level of an image."
+    ))
+  }
+  if (!is.null(step[["n"]])) {
+    cli::cli_abort(c(
+      "Step {.val {full_name}} sets {.field n}.",
+      i = "{.field n} can only be set at the top level of an image."
+    ))
+  }
+
+  spec <- resolve_spec(step, inherited, full_name)
+  children <- if (!is.null(step$sequence)) {
+    parse_steps(step$sequence, spec, path = full_name)
+  }
+
+  c(
+    list(
+      name = step$name,
+      full_name = full_name,
+      description = step$description
+    ),
+    spec,
+    list(sequence = children)
   )
 }
 

@@ -86,5 +86,6 @@ Each image has:
 
 - **`name`** (required): Used as the output filename (`{name}.png`).
 - **`description`** (required, unless a default is set): Prompt for image generation. Use `[name]` to reference images in the same directory.
+- **`sequence`**: A list of steps that build on one another; see `vignette("sequence", package = "bananarama")`. Mutually exclusive with `description`.
 - **`n`**: Number of variants to generate. Output files are named `{name}-1.png`, `{name}-2.png`, etc. Default: `1`.
 - **`style`**, **`aspect-ratio`**, **`resolution`**, **`model`**, **`force`**, **`seed`**: Per-image overrides of the defaults.
