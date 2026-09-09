@@ -1,22 +1,22 @@
 Package: bananarama
-Title: Generate Presentation Images Using Google Gemini
+Title: Generate Presentation Images Using Google Gemini or OpenAI
 Version: 0.0.0.9000
 Authors@R: c(
     person("Hadley", "Wickham", , "hadley@posit.co", role = c("aut", "cre")),
     person("Posit Software, PBC", role = c("cph", "fnd"))
   )
-Description: Reproducibly generate slide images using Google Gemini.
-    Define your images in a YAML configuration file with support for
-    reference images and style defaults, eliminating the need to copy and
-    paste prompts back and forth from a web UI. Images are generated in
-    parallel for speed.
+Description: Reproducibly generate slide images using Google Gemini or
+    OpenAI image models.  Define your images in a YAML configuration file
+    with support for reference images and style defaults, eliminating the
+    need to copy and paste prompts back and forth from a web UI. Images
+    are generated in parallel for speed.
 License: MIT + file LICENSE
 URL: https://github.com/hadley/bananarama,
     https://hadley.github.io/bananarama/
 BugReports: https://github.com/hadley/bananarama/issues
 Imports:
     cli,
-    ellmer,
+    ellmer (>= 0.4.0),
     magick,
     openssl,
     rlang,
@@ -27,9 +27,10 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     withr
+VignetteBuilder: 
+    knitr
 Config/Needs/website: tidyverse/tidytemplate, quarto
+Config/roxygen2/version: 8.1.0
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3.9000
-VignetteBuilder: knitr

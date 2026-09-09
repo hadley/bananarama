@@ -3,11 +3,11 @@
 \docType{package}
 \name{bananarama-package}
 \alias{bananarama-package}
-\title{bananarama: Generate Presentation Images Using Google Gemini}
+\title{bananarama: Generate Presentation Images Using Google Gemini or OpenAI}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Reproducibly generate slide images using Google Gemini. Define your images in a YAML configuration file with support for reference images and style defaults, eliminating the need to copy and paste prompts back and forth from a web UI. Images are generated in parallel for speed.
+Reproducibly generate slide images using Google Gemini or OpenAI image models. Define your images in a YAML configuration file with support for reference images and style defaults, eliminating the need to copy and paste prompts back and forth from a web UI. Images are generated in parallel for speed.
 }
 \seealso{
 Useful links:
