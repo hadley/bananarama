@@ -7,3 +7,4 @@
 demo/output
 docs
 inst/doc
+vignettes/articles/*_files/

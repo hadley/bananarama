@@ -31,17 +31,46 @@ bananarama <- function(
     dir.create(output_dir, recursive = TRUE)
   }
 
-  images <- compute_output_paths(config$images, output_dir)
-
-  # Figure out which images need to be generated
-  tasks <- build_tasks(images, force = force)
-  if (length(tasks) == 0) {
-    return(invisible(all_output_paths(images)))
+  tasks <- build_tasks(config$images, output_dir, force = force)
+  if (length(tasks$pending) == 0) {
+    return(invisible(tasks$paths))
   }
 
-  # Preprocess only the images that need generation
-  for (i in seq_along(tasks)) {
-    tasks[[i]]$image <- preprocess_image(tasks[[i]]$image, config$base_dir)
+  # Tasks form a dependency graph via parent_path: a task is ready once its
+  # parent's output file exists, whether cached on disk or freshly generated.
+  total_cost <- 0
+  pending <- tasks$pending
+  while (length(pending) > 0) {
+    ready <- vapply(pending, task_ready, logical(1))
+    if (!any(ready)) {
+      missing <- unique(vapply(pending, `[[`, character(1), "parent_path"))
+      cli::cli_abort(c(
+        "Cannot generate {length(pending)} image{?s} because their parent images are missing:",
+        x = "{.path {missing}}"
+      ))
+    }
+    total_cost <- total_cost + run_wave(pending[ready], config$base_dir)
+    pending <- pending[!ready]
+  }
+
+  if (total_cost > 0) {
+    cli::cli_alert_info("Total cost: ${round(total_cost, 3)}")
+  }
+
+  invisible(tasks$paths)
+}
+
+task_ready <- function(task) {
+  is.null(task$parent_path) || file.exists(task$parent_path)
+}
+
+run_wave <- function(wave, base_dir) {
+  for (i in seq_along(wave)) {
+    wave[[i]]$image <- preprocess_image(
+      wave[[i]]$image,
+      base_dir,
+      wave[[i]]$parent_path
+    )
   }
 
   # Group tasks by chat config (model, seed, aspect-ratio, resolution)
@@ -50,10 +79,10 @@ bananarama <- function(
     img <- task$image
     rlang::hash(list(img$model, img$seed, img$`aspect-ratio`, img$resolution))
   }
-  task_groups <- split(tasks, vapply(tasks, chat_key, character(1)))
+  task_groups <- split(wave, vapply(wave, chat_key, character(1)))
 
-  cli::cli_alert("Generating {length(tasks)} image{?s} in parallel...")
-  results <- vector("list", length(tasks))
+  cli::cli_alert("Generating {length(wave)} image{?s} in parallel...")
+  results <- vector("list", length(wave))
   for (group in task_groups) {
     chat <- make_chat(group[[1]]$image)
     prompts <- lapply(group, function(task) {
@@ -64,17 +93,17 @@ bananarama <- function(
     for (i in seq_along(group)) {
       idx <- match(
         group[[i]]$output_path,
-        vapply(tasks, `[[`, character(1), "output_path")
+        vapply(wave, `[[`, character(1), "output_path")
       )
       results[[idx]] <- group_results[[i]]
     }
   }
 
   total_cost <- 0
-  for (i in seq_along(tasks)) {
+  for (i in seq_along(wave)) {
     result <- results[[i]]
-    output_path <- tasks[[i]]$output_path
-    model <- tasks[[i]]$image$model
+    output_path <- wave[[i]]$output_path
+    model <- wave[[i]]$image$model
     label <- basename(output_path)
 
     if (inherits(result, "error") || is.null(result)) {
@@ -92,65 +121,143 @@ bananarama <- function(
     }
   }
 
-  if (total_cost > 0) {
-    cli::cli_alert_info("Total cost: ${round(total_cost, 3)}")
-  }
-
-  invisible(all_output_paths(images))
+  total_cost
 }
 
-build_tasks <- function(images, force = FALSE) {
-  tasks <- list()
-  n_skipped <- 0L
+# Flatten images (plain or sequences) into a list of tasks, one per output
+# file. Each task has an image spec, an output_path, and a parent_path
+# (NULL unless this is a sequence step building on a previous step's file).
+build_tasks <- function(images, output_dir, force = FALSE) {
+  all <- list()
   for (image in images) {
-    for (output_path in image$output_paths) {
-      if (!force && !image$force && file.exists(output_path)) {
-        n_skipped <- n_skipped + 1L
-        next
+    if (!is.null(image$sequence) || !is.null(image$images)) {
+      all <- c(all, tree_tasks(image, output_dir))
+    } else {
+      n <- image$n %||% 1L
+      nms <- if (n > 1L) paste0(image$name, "-", seq_len(n)) else image$name
+      for (nm in nms) {
+        all <- c(
+          all,
+          list(list(
+            image = image,
+            output_path = file.path(output_dir, paste0(nm, ".png")),
+            parent_path = NULL,
+            force = image$force %||% FALSE
+          ))
+        )
       }
-      tasks <- c(tasks, list(list(image = image, output_path = output_path)))
     }
   }
-  if (n_skipped > 0) {
-    cli::cli_alert_info("Skipping {n_skipped} image{?s} (already exist{?s})")
+
+  paths <- vapply(all, `[[`, character(1), "output_path")
+  skip <- !force &
+    !vapply(all, function(task) isTRUE(task$force), logical(1)) &
+    file.exists(paths)
+  if (any(skip)) {
+    cli::cli_alert_info("Skipping {sum(skip)} image{?s} (already exist{?s})")
+  }
+
+  list(pending = all[!skip], paths = paths)
+}
+
+# Walk a sequence/images tree, emitting one task per step (with a
+# description) per iteration. A `sequence` chains: the first step builds on
+# the current image and each subsequent step builds on the previous sibling.
+# Nested `images` branch: every child builds on the current image, not on
+# each other. parent_paths tracks the files to build on, one per iteration,
+# so iteration i always builds on iteration i of the parent.
+tree_tasks <- function(image, output_dir) {
+  tasks <- list()
+  n <- image$n %||% 1L
+
+  # Emit tasks for a step; returns the paths later steps should build on
+  # (the step's own paths, or unchanged if the step is a pure branch point).
+  emit <- function(step, parent_paths) {
+    if (is.null(step$description)) {
+      return(parent_paths)
+    }
+    paths <- character(n)
+    for (i in seq_len(n)) {
+      nm <- if (n > 1L) paste0(step$full_name, "-", i) else step$full_name
+      paths[[i]] <- file.path(output_dir, paste0(nm, ".png"))
+
+      spec <- step
+      spec$sequence <- NULL
+      spec$images <- NULL
+      spec$resolution <- image$resolution
+      tasks[[length(tasks) + 1L]] <<- list(
+        image = spec,
+        output_path = paths[[i]],
+        parent_path = if (is.null(parent_paths)) NULL else parent_paths[[i]],
+        force = image$force %||% FALSE
+      )
+    }
+    paths
+  }
+
+  # With chain = TRUE (sequence), each step builds on the previous sibling;
+  # otherwise (images), every step builds on the same parent paths.
+  walk <- function(steps, parent_paths, chain) {
+    for (step in steps) {
+      paths <- emit(step, parent_paths)
+      if (!is.null(step$sequence)) {
+        walk(step$sequence, paths, chain = TRUE)
+      }
+      if (!is.null(step$images)) {
+        walk(step$images, paths, chain = FALSE)
+      }
+      if (chain) {
+        parent_paths <- paths
+      }
+    }
+  }
+
+  # A top-level image with a description generates its own file first, and
+  # its children build on it.
+  parent_paths <- emit(image, NULL)
+  if (!is.null(image$sequence)) {
+    walk(image$sequence, parent_paths, chain = TRUE)
+  }
+  if (!is.null(image$images)) {
+    walk(image$images, parent_paths, chain = FALSE)
   }
   tasks
 }
 
-all_output_paths <- function(images) {
-  unlist(lapply(images, function(image) image$output_paths))
-}
+preprocess_image <- function(image, base_dir, parent_path = NULL) {
+  # A parent image (from the previous sequence step) is passed as the first
+  # reference image; use it as-is rather than resizing the cached output.
+  parent_images <- list()
+  start_index <- 0L
+  if (!is.null(parent_path)) {
+    parent_images <- list(ellmer::content_image_file(
+      parent_path,
+      resize = "none"
+    ))
+    start_index <- 1L
+  }
 
-compute_output_paths <- function(images, output_dir) {
-  lapply(images, function(image) {
-    n <- image[["n"]] %||% 1L
-    if (n > 1L) {
-      suffixed_names <- paste0(image$name, "-", seq_len(n))
-    } else {
-      suffixed_names <- image$name
-    }
-    image$output_paths <- file.path(
-      output_dir,
-      paste0(suffixed_names, ".png")
-    )
-    image
-  })
-}
+  resolved_style <- resolve_placeholders(image$style, base_dir, start_index)
 
-preprocess_image <- function(image, base_dir) {
-  resolved_style <- resolve_placeholders(image$style, base_dir)
-
-  n <- length(resolved_style$images)
+  n <- start_index + length(resolved_style$images)
   resolved_desc <- resolve_placeholders(image$description, base_dir, n)
   prompt <- paste(
     c(
+      if (!is.null(parent_path)) "Modify the first image as follows:",
       resolved_desc$text,
       paste0("Style: ", resolved_style$text, recycle0 = TRUE)
     ),
     collapse = "\n\n"
   )
-  ref_image_paths <- c(resolved_style$images, resolved_desc$images)
-  ref_images <- lapply(ref_image_paths, get_reference_image)
+  ref_image_paths <- c(
+    parent_path %||% character(),
+    resolved_style$images,
+    resolved_desc$images
+  )
+  ref_images <- c(
+    parent_images,
+    lapply(c(resolved_style$images, resolved_desc$images), get_reference_image)
+  )
 
   image$prompt <- prompt
   image$ref_image_paths <- ref_image_paths
