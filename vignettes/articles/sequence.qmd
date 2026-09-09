@@ -87,14 +87,18 @@ Then introduce the main character. Because this step builds on the cached meadow
 
 ![](story/robot-story-robot.png)
 
-Then the story beats: the robot finds a flower.
+And we can zoom in, preserving the existing imagery:
+
+![](story/robot-story-zoom.png)
+
+Then robot finds a flower.
 
 ![](story/robot-story-flower.png)
 
 The `flower` step has both a `description` and a nested `sequence`, so its image is saved *and* two images branch off from it:
 
 ::: {layout-ncol=2}
-![](story/robot-story-flower-day.png)
+![](story/robot-story-flower-careful.png)
 
-![](story/robot-story-flower-night.png)
+![](story/robot-story-flower-stomp.png)
 :::
