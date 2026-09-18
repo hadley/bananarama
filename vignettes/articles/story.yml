@@ -1,8 +1,8 @@
 defaults:
+  model: gpt-image-2.5-flare
   style: >
     Chunky gouache illustration with opaque matte colors, visible brushwork,
     bold simplified shapes, and a mid-century children's book feel
-  model: gpt-image-2.5-flare
 
 images:
   - name: robot-story
