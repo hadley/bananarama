@@ -60,6 +60,18 @@ bananarama <- function(
   invisible(tasks$paths)
 }
 
+# A task is a single image to generate: the spec to send to the model, the
+# file to write, the parent file it builds on (NULL for none), and whether
+# to regenerate even if the output already exists.
+new_task <- function(image, output_path, parent_path = NULL) {
+  list(
+    image = image,
+    output_path = output_path,
+    parent_path = parent_path,
+    force = image$force %||% FALSE
+  )
+}
+
 task_ready <- function(task) {
   is.null(task$parent_path) || file.exists(task$parent_path)
 }
@@ -138,11 +150,9 @@ build_tasks <- function(images, output_dir, force = FALSE) {
       for (nm in nms) {
         all <- c(
           all,
-          list(list(
+          list(new_task(
             image = image,
-            output_path = file.path(output_dir, paste0(nm, ".png")),
-            parent_path = NULL,
-            force = image$force %||% FALSE
+            output_path = file.path(output_dir, paste0(nm, ".png"))
           ))
         )
       }
@@ -185,11 +195,10 @@ tree_tasks <- function(image, output_dir) {
       spec$sequence <- NULL
       spec$images <- NULL
       spec$resolution <- image$resolution
-      tasks[[length(tasks) + 1L]] <<- list(
+      tasks[[length(tasks) + 1L]] <<- new_task(
         image = spec,
         output_path = paths[[i]],
-        parent_path = if (is.null(parent_paths)) NULL else parent_paths[[i]],
-        force = image$force %||% FALSE
+        parent_path = if (is.null(parent_paths)) NULL else parent_paths[[i]]
       )
     }
     paths
