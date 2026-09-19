@@ -118,19 +118,29 @@ run_wave <- function(wave, base_dir) {
     model <- wave[[i]]$image$model
     label <- basename(output_path)
 
-    if (inherits(result, "error") || is.null(result)) {
-      cli::cli_alert_danger("Failed to generate {.val {label}}")
-    } else if (!save_generated_image(result, output_path)) {
-      cli::cli_alert_danger(
-        "Failed to generate {.val {label}} (no image in response)"
-      )
-    } else {
-      cost <- image_cost(result, model)
-      total_cost <- total_cost + cost
-      cli::cli_alert_success(
-        "Generated {.val {label}} (${round(cost, 3)})"
-      )
+    # Failures almost always indicate a problem to fix first (bad key, no
+    # quota, filtered prompt), so abort the whole run rather than continue.
+    if (inherits(result, "error")) {
+      cli::cli_abort(c(
+        "Failed to generate {.val {label}}.",
+        x = conditionMessage(result)
+      ))
     }
+    if (is.null(result)) {
+      cli::cli_abort("Failed to generate {.val {label}} (no response).")
+    }
+
+    failure <- save_generated_image(result, output_path)
+    if (!isTRUE(failure)) {
+      cli::cli_abort(c(
+        "Failed to generate {.val {label}}: model did not return an image.",
+        x = failure
+      ))
+    }
+
+    cost <- image_cost(result, model)
+    total_cost <- total_cost + cost
+    cli::cli_alert_success("Generated {.val {label}} (${round(cost, 3)})")
   }
 
   total_cost
@@ -320,27 +330,43 @@ resize_reference_image <- function(path, max_size = "512x512") {
   invisible(TRUE)
 }
 
+# Returns invisible(TRUE) on success; on failure, a character vector of
+# details about what the provider returned instead of an image.
 save_generated_image <- function(chat, output_path) {
   turn <- chat$last_turn()
   image_content <- Find(
     function(x) inherits(x, "ellmer::ContentImageInline"),
     turn@contents
   )
-  if (is.null(image_content)) {
-    text <- paste(
-      vapply(
-        Filter(function(x) inherits(x, "ellmer::ContentText"), turn@contents),
-        function(x) x@text,
-        character(1)
-      ),
-      collapse = "\n"
-    )
-    cli::cli_warn(c(
-      "The model did not return an image for {.val {basename(output_path)}}.",
-      i = if (nzchar(text)) "Response: {text}"
-    ))
-    return(invisible(FALSE))
+  if (!is.null(image_content)) {
+    writeBin(openssl::base64_decode(image_content@data), output_path)
+    return(invisible(TRUE))
   }
-  writeBin(openssl::base64_decode(image_content@data), output_path)
-  invisible(TRUE)
+
+  text <- paste(
+    vapply(
+      Filter(function(x) inherits(x, "ellmer::ContentText"), turn@contents),
+      function(x) x@text,
+      character(1)
+    ),
+    collapse = "\n"
+  )
+  code <- finish_reason(turn)
+  c(
+    if (!is.null(code)) paste0("Provider response: ", code),
+    if (nzchar(text)) paste0("Response text: ", text)
+  )
+}
+
+# Why the provider stopped, e.g. Gemini's finishReason ("PROHIBITED_CONTENT")
+# or the OpenAI Responses API's incomplete_details.reason ("content_filter").
+finish_reason <- function(turn) {
+  reason <- turn@json$candidates[[1]]$finishReason %||%
+    turn@json$promptFeedback$blockReason %||%
+    turn@json$incomplete_details$reason %||%
+    turn@finish_reason
+  if (length(reason) == 0 || is.na(reason)) {
+    return(NULL)
+  }
+  reason
 }
