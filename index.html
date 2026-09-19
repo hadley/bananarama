@@ -44,6 +44,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/randomness.html">Randomness and seeds</a></li>
+    <li><a class="dropdown-item" href="articles/sequence.html">Sequences</a></li>
     <li><a class="dropdown-item" href="articles/styles.html">Styles</a></li>
   </ul>
 </li>
@@ -168,6 +169,8 @@
 <strong><code>name</code></strong> (required): Used as the output filename (<code>{name}.png</code>).</li>
 <li>
 <strong><code>description</code></strong> (required, unless a default is set): Prompt for image generation. Use <code>[name]</code> to reference images in the same directory.</li>
+<li>
+<strong><code>sequence</code></strong>: A list of steps that build on one another; see <code>vignette("sequence", package = "bananarama")</code>. Mutually exclusive with <code>description</code>.</li>
 <li>
 <strong><code>n</code></strong>: Number of variants to generate. Output files are named <code>{name}-1.png</code>, <code>{name}-2.png</code>, etc. Default: <code>1</code>.</li>
 <li>
