@@ -313,6 +313,54 @@ test_that("preprocess_image handles placeholders in style", {
   expect_length(result$ref_images, 2)
 })
 
+test_that("save_generated_image reports provider code and response text", {
+  fake_chat <- function(turn) {
+    list(last_turn = function() turn)
+  }
+
+  # Content-filtered: no content at all, just a finishReason
+  turn <- ellmer::Turn("assistant", list())
+  turn@json <- list(
+    candidates = list(list(finishReason = "PROHIBITED_CONTENT"))
+  )
+  expect_equal(
+    save_generated_image(fake_chat(turn), tempfile()),
+    "Provider response: PROHIBITED_CONTENT"
+  )
+
+  # Text instead of an image: both code and text are reported
+  turn <- ellmer::Turn(
+    "assistant",
+    list(ellmer::ContentText("I can't draw that."))
+  )
+  turn@json <- list(incomplete_details = list(reason = "content_filter"))
+  expect_equal(
+    save_generated_image(fake_chat(turn), tempfile()),
+    c(
+      "Provider response: content_filter",
+      "Response text: I can't draw that."
+    )
+  )
+
+  # No info at all: empty details
+  turn <- ellmer::Turn("assistant", list())
+  turn@json <- list()
+  expect_null(save_generated_image(fake_chat(turn), tempfile()))
+})
+
+test_that("save_generated_image writes inline images", {
+  png_b64 <- openssl::base64_encode(png::writePNG(array(1, c(1, 1, 3))))
+  turn <- ellmer::Turn(
+    "assistant",
+    list(ellmer::ContentImageInline(data = png_b64, type = "image/png"))
+  )
+  chat <- list(last_turn = function() turn)
+
+  out <- tempfile(fileext = ".png")
+  expect_true(save_generated_image(chat, out))
+  expect_true(file.exists(out))
+})
+
 test_that("provider price tables cover known models", {
   expect_named(
     gemini_prices,
