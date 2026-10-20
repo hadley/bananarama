@@ -118,7 +118,11 @@ run_wave <- function(wave, base_dir) {
     model <- wave[[i]]$image$model
     label <- basename(output_path)
 
-    if (inherits(result, "error") || is.null(result)) {
+    if (inherits(result, "error")) {
+      cli::cli_alert_danger(
+        "Failed to generate {.val {label}}: {conditionMessage(result)}"
+      )
+    } else if (is.null(result)) {
       cli::cli_alert_danger("Failed to generate {.val {label}}")
     } else if (!save_generated_image(result, output_path)) {
       cli::cli_alert_danger(
